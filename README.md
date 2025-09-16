@@ -1,4 +1,4 @@
-# GetItDone - Local Gig Board
+# Group 4 Project 1 - GetItDone
 
 A simple, local gig board for quick, everyday tasks built as a student project for MIS 321 - Web Development.
 
