@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Stuff - GetItDone</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-primary" href="index.html">
+                <i class="bi bi-check-circle-fill me-2"></i>GetItDone
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="browse.html">Browse Tasks</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="post.html">Post a Task</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="my-stuff.html">My Stuff</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="rules.html">Rules & Safety</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="about.html">About</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container py-4">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">My Stuff</li>
+            </ol>
+        </nav>
+
+        <!-- Header -->
+        <div class="text-center mb-5">
+            <h1 class="display-5 fw-bold mb-3">My Stuff</h1>
+            <p class="lead text-muted">Manage your posted tasks and track your applications.</p>
+        </div>
+
+        <!-- User Email Input (if not logged in) -->
+        <div id="my-stuff-content">
+            <!-- Content will be populated by JavaScript -->
+        </div>
+
+        <!-- Dashboard Content (when user is logged in) -->
+        <div id="dashboard-content" style="display: none;">
+            <!-- Tabs -->
+            <ul class="nav nav-tabs mb-4" id="myStuffTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="posted-tasks-tab" data-bs-toggle="tab" data-bs-target="#posted-tasks" type="button" role="tab">
+                        <i class="bi bi-plus-circle me-2"></i>My Posted Tasks
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="applications-tab" data-bs-toggle="tab" data-bs-target="#applications" type="button" role="tab">
+                        <i class="bi bi-person-check me-2"></i>My Applications
+                    </button>
+                </li>
+            </ul>
+
+            <!-- Tab Content -->
+            <div class="tab-content" id="myStuffTabContent">
+                <!-- Posted Tasks Tab -->
+                <div class="tab-pane fade show active" id="posted-tasks" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="fw-bold mb-0">My Posted Tasks</h3>
+                        <a href="post.html" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-2"></i>Post New Task
+                        </a>
+                    </div>
+
+                    <!-- Stats Cards -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h5 class="card-title text-primary" id="total-tasks">0</h5>
+                                    <p class="card-text text-muted">Total Tasks</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h5 class="card-title text-success" id="open-tasks">0</h5>
+                                    <p class="card-text text-muted">Open</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h5 class="card-title text-warning" id="assigned-tasks">0</h5>
+                                    <p class="card-text text-muted">Assigned</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h5 class="card-title text-info" id="completed-tasks">0</h5>
+                                    <p class="card-text text-muted">Completed</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Posted Tasks List -->
+                    <div id="my-posted-tasks">
+                        <!-- Tasks will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Applications Tab -->
+                <div class="tab-pane fade" id="applications" role="tabpanel">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h3 class="fw-bold mb-0">My Applications</h3>
+                        <a href="browse.html" class="btn btn-outline-primary">
+                            <i class="bi bi-search me-2"></i>Browse Tasks
+                        </a>
+                    </div>
+
+                    <!-- Application Stats -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h5 class="card-title text-primary" id="total-applications">0</h5>
+                                    <p class="card-text text-muted">Total Applications</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h5 class="card-title text-warning" id="pending-applications">0</h5>
+                                    <p class="card-text text-muted">Pending</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h5 class="card-title text-success" id="accepted-applications">0</h5>
+                                    <p class="card-text text-muted">Accepted</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Applications List -->
+                    <div id="my-applications">
+                        <!-- Applications will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Management Modal -->
+    <div class="modal fade" id="task-management-modal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modal-title">Manage Task</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <!-- Task Details -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold">Task Details</h6>
+                        <div id="modal-task-details">
+                            <!-- Task details will be populated -->
+                        </div>
+                    </div>
+
+                    <!-- Applications -->
+                    <div class="mb-4">
+                        <h6 class="fw-bold">Applications</h6>
+                        <div id="modal-applications">
+                            <!-- Applications will be populated -->
+                        </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="mb-3">
+                        <h6 class="fw-bold">Actions</h6>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-success" id="mark-completed-btn" onclick="markTaskCompleted()">
+                                <i class="bi bi-check-circle me-2"></i>Mark Completed
+                            </button>
+                            <button type="button" class="btn btn-warning" id="reopen-task-btn" onclick="reopenTask()">
+                                <i class="bi bi-arrow-clockwise me-2"></i>Reopen Task
+                            </button>
+                            <button type="button" class="btn btn-danger" id="cancel-task-btn" onclick="cancelTask()">
+                                <i class="bi bi-x-circle me-2"></i>Cancel Task
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="fw-bold mb-3">GetItDone</h5>
+                    <p class="text-muted">Connecting people for quick, everyday tasks in your community.</p>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="fw-bold mb-3">Quick Links</h6>
+                    <div class="d-flex flex-column">
+                        <a href="rules.html" class="text-muted text-decoration-none mb-1">Rules & Safety</a>
+                        <a href="about.html" class="text-muted text-decoration-none mb-1">About Us</a>
+                        <a href="browse.html" class="text-muted text-decoration-none mb-1">Browse Tasks</a>
+                        <a href="post.html" class="text-muted text-decoration-none mb-1">Post a Task</a>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <p class="text-muted mb-0">&copy; 2024 GetItDone. Student project for educational purposes.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+    <script>
+        // Additional functions for My Stuff page
+        let currentTaskId = null;
+
+        function showTaskManagement(taskId) {
+            currentTaskId = taskId;
+            const task = dataManager.getTaskById(taskId);
+            if (!task) return;
+
+            // Update modal title
+            document.getElementById('modal-title').textContent = `Manage: ${task.title}`;
+
+            // Update task details
+            const taskDetails = document.getElementById('modal-task-details');
+            taskDetails.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Status:</strong> <span class="status-badge status-${task.status}">${task.status.charAt(0).toUpperCase() + task.status.slice(1)}</span></p>
+                        <p><strong>Pay:</strong> $${task.payAmount}</p>
+                        <p><strong>Date:</strong> ${new Date(task.date).toLocaleDateString()}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Time:</strong> ${task.timeWindow}</p>
+                        <p><strong>Location:</strong> ${task.locationName}</p>
+                        <p><strong>Posted:</strong> ${new Date(task.createdAt).toLocaleDateString()}</p>
+                    </div>
+                </div>
+                <p><strong>Description:</strong> ${task.description}</p>
+            `;
+
+            // Load applications
+            loadTaskApplications(taskId);
+
+            // Show/hide action buttons based on status
+            const markCompletedBtn = document.getElementById('mark-completed-btn');
+            const reopenBtn = document.getElementById('reopen-task-btn');
+            const cancelBtn = document.getElementById('cancel-task-btn');
+
+            markCompletedBtn.style.display = task.status === 'assigned' ? 'block' : 'none';
+            reopenBtn.style.display = task.status === 'completed' ? 'block' : 'none';
+            cancelBtn.style.display = task.status !== 'completed' && task.status !== 'cancelled' ? 'block' : 'none';
+
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('task-management-modal'));
+            modal.show();
+        }
+
+        function loadTaskApplications(taskId) {
+            const applications = dataManager.getApplicationsByTaskId(taskId);
+            const container = document.getElementById('modal-applications');
+
+            if (applications.length === 0) {
+                container.innerHTML = '<p class="text-muted">No applications yet.</p>';
+                return;
+            }
+
+            container.innerHTML = '';
+
+            applications.forEach(app => {
+                const appElement = document.createElement('div');
+                appElement.className = 'applicant-card mb-3';
+                
+                const statusClass = `status-${app.status}`;
+                const statusText = app.status.charAt(0).toUpperCase() + app.status.slice(1);
+
+                appElement.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                            <div class="applicant-name">${app.helperName}</div>
+                            <div class="applicant-email">${app.helperEmail}</div>
+                            ${app.phone ? `<div class="applicant-phone">${app.phone}</div>` : ''}
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="status-badge ${statusClass}">${statusText}</span>
+                            ${app.status === 'submitted' ? `
+                                <button class="btn btn-success btn-sm" onclick="assignHelper(${app.id})">
+                                    <i class="bi bi-check"></i> Assign
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                    <div class="applicant-note">${app.note}</div>
+                    <div class="mt-2">
+                        <small class="text-muted">Applied: ${new Date(app.createdAt).toLocaleDateString()}</small>
+                    </div>
+                `;
+
+                container.appendChild(appElement);
+            });
+        }
+
+        function assignHelper(applicationId) {
+            if (!currentTaskId) return;
+
+            // Update task status to assigned
+            dataManager.updateTask(currentTaskId, { status: 'assigned' });
+
+            // Update application status to accepted
+            dataManager.updateApplication(applicationId, { status: 'accepted' });
+
+            // Decline all other applications for this task
+            const allApplications = dataManager.getApplicationsByTaskId(currentTaskId);
+            allApplications.forEach(app => {
+                if (app.id !== applicationId && app.status === 'submitted') {
+                    dataManager.updateApplication(app.id, { status: 'declined' });
+                }
+            });
+
+            // Show success message
+            if (window.app) {
+                window.app.showSuccess('Helper assigned successfully!');
+            }
+
+            // Reload the modal content
+            loadTaskApplications(currentTaskId);
+
+            // Reload the main page content
+            if (window.app) {
+                window.app.loadMyStuff();
+            }
+        }
+
+        function markTaskCompleted() {
+            if (!currentTaskId) return;
+
+            dataManager.updateTask(currentTaskId, { status: 'completed' });
+
+            if (window.app) {
+                window.app.showSuccess('Task marked as completed!');
+                window.app.loadMyStuff();
+            }
+
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('task-management-modal'));
+            modal.hide();
+        }
+
+        function reopenTask() {
+            if (!currentTaskId) return;
+
+            dataManager.updateTask(currentTaskId, { status: 'open' });
+
+            if (window.app) {
+                window.app.showSuccess('Task reopened!');
+                window.app.loadMyStuff();
+            }
+
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('task-management-modal'));
+            modal.hide();
+        }
+
+        function cancelTask() {
+            if (!currentTaskId) return;
+
+            if (confirm('Are you sure you want to cancel this task?')) {
+                dataManager.updateTask(currentTaskId, { status: 'cancelled' });
+
+                if (window.app) {
+                    window.app.showSuccess('Task cancelled!');
+                    window.app.loadMyStuff();
+                }
+
+                // Close modal
+                const modal = bootstrap.Modal.getInstance(document.getElementById('task-management-modal'));
+                modal.hide();
+            }
+        }
+
+        // Enhanced My Stuff functionality
+        function updateStats() {
+            if (!window.app || !window.app.currentUser) return;
+
+            const myTasks = dataManager.getAllTasks().filter(task => task.posterEmail === window.app.currentUser);
+            const myApplications = dataManager.getApplicationsByHelperEmail(window.app.currentUser);
+
+            // Update task stats
+            document.getElementById('total-tasks').textContent = myTasks.length;
+            document.getElementById('open-tasks').textContent = myTasks.filter(t => t.status === 'open').length;
+            document.getElementById('assigned-tasks').textContent = myTasks.filter(t => t.status === 'assigned').length;
+            document.getElementById('completed-tasks').textContent = myTasks.filter(t => t.status === 'completed').length;
+
+            // Update application stats
+            document.getElementById('total-applications').textContent = myApplications.length;
+            document.getElementById('pending-applications').textContent = myApplications.filter(a => a.status === 'submitted').length;
+            document.getElementById('accepted-applications').textContent = myApplications.filter(a => a.status === 'accepted').length;
+        }
+
+        // Override the createMyTaskElement to include management button
+        if (window.app) {
+            const originalCreateMyTaskElement = window.app.createMyTaskElement;
+            window.app.createMyTaskElement = function(task) {
+                const div = originalCreateMyTaskElement.call(this, task);
+                
+                // Add management button
+                const cardBody = div.querySelector('.card-body');
+                const buttonGroup = cardBody.querySelector('.d-flex');
+                if (buttonGroup) {
+                    const manageBtn = document.createElement('button');
+                    manageBtn.className = 'btn btn-outline-secondary btn-sm me-2';
+                    manageBtn.innerHTML = '<i class="bi bi-gear me-1"></i>Manage';
+                    manageBtn.onclick = () => showTaskManagement(task.id);
+                    buttonGroup.insertBefore(manageBtn, buttonGroup.firstChild);
+                }
+
+                return div;
+            };
+        }
+
+        // Update stats when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                if (window.app && window.app.currentUser) {
+                    updateStats();
+                }
+            }, 500);
+        });
+    </script>
+</body>
+</html>
+

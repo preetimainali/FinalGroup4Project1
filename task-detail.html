@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Details - GetItDone</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-primary" href="index.html">
+                <i class="bi bi-check-circle-fill me-2"></i>GetItDone
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="browse.html">Browse Tasks</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="post.html">Post a Task</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="my-stuff.html">My Stuff</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="rules.html">Rules & Safety</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="about.html">About</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container py-4">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                <li class="breadcrumb-item"><a href="browse.html">Browse Tasks</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Task Details</li>
+            </ol>
+        </nav>
+
+        <div class="row">
+            <!-- Task Details -->
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-body">
+                        <!-- Task Header -->
+                        <div class="d-flex justify-content-between align-items-start mb-4">
+                            <div>
+                                <h1 class="card-title mb-2" id="task-title">Loading...</h1>
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="task-pay fs-4" id="task-pay">$0</span>
+                                    <span class="status-badge" id="task-status">Open</span>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <small class="text-muted">Posted by <span id="task-poster">Unknown</span></small><br>
+                                <small class="text-muted" id="task-created">Recently</small>
+                            </div>
+                        </div>
+
+                        <!-- Task Description -->
+                        <div class="mb-4">
+                            <h5 class="fw-bold mb-3">Description</h5>
+                            <p class="card-text" id="task-description">Loading task description...</p>
+                        </div>
+
+                        <!-- Task Details Grid -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-calendar-event text-primary me-3 fs-5"></i>
+                                    <div>
+                                        <div class="fw-bold">Date</div>
+                                        <div class="text-muted" id="task-date">Loading...</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-clock text-primary me-3 fs-5"></i>
+                                    <div>
+                                        <div class="fw-bold">Time Window</div>
+                                        <div class="text-muted" id="task-time">Loading...</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-geo-alt text-primary me-3 fs-5"></i>
+                                    <div>
+                                        <div class="fw-bold">Location</div>
+                                        <div class="text-muted" id="task-location">Loading...</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="bi bi-person text-primary me-3 fs-5"></i>
+                                    <div>
+                                        <div class="fw-bold">Contact</div>
+                                        <div class="text-muted" id="task-contact">Loading...</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Tags -->
+                        <div class="mb-4">
+                            <h5 class="fw-bold mb-3">Categories</h5>
+                            <div id="task-tags">
+                                <!-- Populated by JavaScript -->
+                            </div>
+                        </div>
+
+                        <!-- Apply Button -->
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                            <button class="btn btn-primary btn-lg" id="apply-button" onclick="showApplyModal()">
+                                <i class="bi bi-person-plus me-2"></i>Apply to Help
+                            </button>
+                            <a href="browse.html" class="btn btn-outline-secondary btn-lg">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Browse
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Safety Reminder -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">
+                            <i class="bi bi-shield-check me-2"></i>Safety First
+                        </h5>
+                        <ul class="list-unstyled mb-0">
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                Meet in public spaces
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                Share your location with a friend
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                Verify identity before meeting
+                            </li>
+                            <li class="mb-2">
+                                <i class="bi bi-check-circle text-success me-2"></i>
+                                Payment after completion
+                            </li>
+                        </ul>
+                        <a href="rules.html" class="btn btn-outline-primary btn-sm mt-3">View Full Safety Guidelines</a>
+                    </div>
+                </div>
+
+                <!-- Similar Tasks -->
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Similar Tasks</h5>
+                        <div id="similar-tasks">
+                            <!-- Populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Applications Section (for task posters) -->
+        <div class="row mt-5" id="applications-section" style="display: none;">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-people me-2"></i>Applications
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="applications-container">
+                            <!-- Applications will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Apply Modal -->
+    <div class="modal fade" id="apply-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Apply to Help</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="apply-form">
+                    <div class="modal-body">
+                        <input type="hidden" id="apply-task-id" name="taskId">
+                        
+                        <div class="mb-3">
+                            <label for="helper-name" class="form-label">Your Name *</label>
+                            <input type="text" class="form-control" id="helper-name" name="helperName" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="helper-email" class="form-label">Your Email *</label>
+                            <input type="email" class="form-control" id="helper-email" name="helperEmail" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="helper-phone" class="form-label">Phone Number (Optional)</label>
+                            <input type="tel" class="form-control" id="helper-phone" name="phone">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="helper-note" class="form-label">Message *</label>
+                            <textarea class="form-control" id="helper-note" name="note" rows="3" 
+                                placeholder="Tell the poster about your availability and experience..." required></textarea>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="meet-requirement" required>
+                            <label class="form-check-label" for="meet-requirement">
+                                I can meet at the listed time and place *
+                            </label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Submit Application</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="fw-bold mb-3">GetItDone</h5>
+                    <p class="text-muted">Connecting people for quick, everyday tasks in your community.</p>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="fw-bold mb-3">Quick Links</h6>
+                    <div class="d-flex flex-column">
+                        <a href="rules.html" class="text-muted text-decoration-none mb-1">Rules & Safety</a>
+                        <a href="about.html" class="text-muted text-decoration-none mb-1">About Us</a>
+                        <a href="browse.html" class="text-muted text-decoration-none mb-1">Browse Tasks</a>
+                        <a href="post.html" class="text-muted text-decoration-none mb-1">Post a Task</a>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <p class="text-muted mb-0">&copy; 2024 GetItDone. Student project for educational purposes.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+    <script>
+        // Additional functions for task detail page
+        function showApplyModal() {
+            const taskId = new URLSearchParams(window.location.search).get('id');
+            if (taskId && window.app) {
+                window.app.showApplyModal(taskId);
+            }
+        }
+
+        // Load similar tasks
+        function loadSimilarTasks(currentTask) {
+            const container = document.getElementById('similar-tasks');
+            if (!container) return;
+
+            const allTasks = dataManager.getAllTasks();
+            const similarTasks = allTasks
+                .filter(task => 
+                    task.id !== currentTask.id && 
+                    task.status === 'open' &&
+                    (task.tags.some(tag => currentTask.tags.includes(tag)) ||
+                     task.locationName === currentTask.locationName)
+                )
+                .slice(0, 3);
+
+            container.innerHTML = '';
+
+            if (similarTasks.length === 0) {
+                container.innerHTML = '<p class="text-muted">No similar tasks found.</p>';
+                return;
+            }
+
+            similarTasks.forEach(task => {
+                const taskElement = document.createElement('div');
+                taskElement.className = 'border-bottom pb-3 mb-3';
+                taskElement.innerHTML = `
+                    <h6 class="fw-bold mb-1">${task.title}</h6>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="text-success fw-bold">$${task.payAmount}</span>
+                        <small class="text-muted">${task.locationName}</small>
+                    </div>
+                    <div class="mb-2">
+                        ${task.tags.slice(0, 2).map(tag => `<span class="tag-badge">#${tag}</span>`).join('')}
+                    </div>
+                    <a href="task-detail.html?id=${task.id}" class="btn btn-outline-primary btn-sm">View Details</a>
+                `;
+                container.appendChild(taskElement);
+            });
+        }
+
+        // Enhanced task detail loading
+        document.addEventListener('DOMContentLoaded', () => {
+            // Wait for app to initialize
+            setTimeout(() => {
+                const taskId = new URLSearchParams(window.location.search).get('id');
+                if (taskId && window.app) {
+                    const task = dataManager.getTaskById(taskId);
+                    if (task) {
+                        loadSimilarTasks(task);
+                        
+                        // Show applications section if user is the poster
+                        const currentUser = window.app.currentUser;
+                        if (currentUser && currentUser === task.posterEmail) {
+                            document.getElementById('applications-section').style.display = 'block';
+                        }
+                    }
+                }
+            }, 200);
+        });
+    </script>
+</body>
+</html>

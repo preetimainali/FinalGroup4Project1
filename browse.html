@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Tasks - GetItDone</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-primary" href="index.html">
+                <i class="bi bi-check-circle-fill me-2"></i>GetItDone
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="browse.html">Browse Tasks</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="post.html">Post a Task</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="my-stuff.html">My Stuff</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="rules.html">Rules & Safety</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="about.html">About</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container py-4">
+        <div class="row">
+            <!-- Filters Sidebar -->
+            <div class="col-lg-3 mb-4">
+                <div class="filter-panel">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0">Filters</h5>
+                        <button class="btn btn-outline-primary btn-sm d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#filtersOffcanvas">
+                            <i class="bi bi-funnel"></i>
+                        </button>
+                    </div>
+
+                    <!-- Mobile Offcanvas -->
+                    <div class="offcanvas offcanvas-start d-lg-none" tabindex="-1" id="filtersOffcanvas">
+                        <div class="offcanvas-header">
+                            <h5 class="offcanvas-title">Filters</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+                        </div>
+                        <div class="offcanvas-body">
+                            <form id="filter-form-mobile">
+                                <!-- Search -->
+                                <div class="filter-section">
+                                    <label for="search-input-mobile" class="filter-title">Search</label>
+                                    <input type="text" class="form-control" id="search-input-mobile" placeholder="Search tasks...">
+                                </div>
+
+                                <!-- Tags -->
+                                <div class="filter-section">
+                                    <div class="filter-title">Categories</div>
+                                    <div id="tag-filters-mobile">
+                                        <!-- Populated by JavaScript -->
+                                    </div>
+                                </div>
+
+                                <!-- Status -->
+                                <div class="filter-section">
+                                    <div class="filter-title">Status</div>
+                                    <div id="status-filters-mobile">
+                                        <!-- Populated by JavaScript -->
+                                    </div>
+                                </div>
+
+                                <!-- Location -->
+                                <div class="filter-section">
+                                    <label for="location-filter-mobile" class="filter-title">Location</label>
+                                    <select class="form-select" id="location-filter-mobile" name="location">
+                                        <!-- Populated by JavaScript -->
+                                    </select>
+                                </div>
+
+                                <!-- Time -->
+                                <div class="filter-section">
+                                    <label for="time-filter-mobile" class="filter-title">Time</label>
+                                    <select class="form-select" id="time-filter-mobile" name="timeFilter">
+                                        <!-- Populated by JavaScript -->
+                                    </select>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Desktop Filters -->
+                    <form id="filter-form" class="d-none d-lg-block">
+                        <!-- Search -->
+                        <div class="filter-section">
+                            <label for="search-input" class="filter-title">Search</label>
+                            <input type="text" class="form-control" id="search-input" placeholder="Search tasks...">
+                        </div>
+
+                        <!-- Tags -->
+                        <div class="filter-section">
+                            <div class="filter-title">Categories</div>
+                            <div id="tag-filters">
+                                <!-- Populated by JavaScript -->
+                            </div>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="filter-section">
+                            <div class="filter-title">Status</div>
+                            <div id="status-filters">
+                                <!-- Populated by JavaScript -->
+                            </div>
+                        </div>
+
+                        <!-- Location -->
+                        <div class="filter-section">
+                            <label for="location-filter" class="filter-title">Location</label>
+                            <select class="form-select" id="location-filter" name="location">
+                                <!-- Populated by JavaScript -->
+                            </select>
+                        </div>
+
+                        <!-- Time -->
+                        <div class="filter-section">
+                            <label for="time-filter" class="filter-title">Time</label>
+                            <select class="form-select" id="time-filter" name="timeFilter">
+                                <!-- Populated by JavaScript -->
+                            </select>
+                        </div>
+
+                        <!-- Clear Filters -->
+                        <div class="filter-section">
+                            <button type="button" class="btn btn-outline-secondary btn-sm w-100" onclick="clearFilters()">
+                                Clear All Filters
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tasks Content -->
+            <div class="col-lg-9">
+                <!-- Header -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="fw-bold mb-1">Browse Tasks</h2>
+                        <p class="text-muted mb-0" id="results-count">Loading tasks...</p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <select class="form-select" id="sort-select" style="width: auto;">
+                            <option value="newest">Newest First</option>
+                            <option value="oldest">Oldest First</option>
+                            <option value="deadline">Deadline</option>
+                            <option value="pay">Highest Pay</option>
+                        </select>
+                        <a href="post.html" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-2"></i>Post a Task
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Tasks Grid -->
+                <div class="row" id="tasks-container">
+                    <!-- Tasks will be populated by JavaScript -->
+                </div>
+
+                <!-- No Results Message -->
+                <div class="text-center py-5 d-none" id="no-results">
+                    <i class="bi bi-search display-1 text-muted mb-3"></i>
+                    <h4 class="text-muted">No tasks found</h4>
+                    <p class="text-muted">Try adjusting your filters or <a href="post.html">post a new task</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Apply Modal -->
+    <div class="modal fade" id="apply-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Apply to Help</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="apply-form">
+                    <div class="modal-body">
+                        <input type="hidden" id="apply-task-id" name="taskId">
+                        
+                        <div class="mb-3">
+                            <label for="helper-name" class="form-label">Your Name *</label>
+                            <input type="text" class="form-control" id="helper-name" name="helperName" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="helper-email" class="form-label">Your Email *</label>
+                            <input type="email" class="form-control" id="helper-email" name="helperEmail" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="helper-phone" class="form-label">Phone Number (Optional)</label>
+                            <input type="tel" class="form-control" id="helper-phone" name="phone">
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="helper-note" class="form-label">Message *</label>
+                            <textarea class="form-control" id="helper-note" name="note" rows="3" 
+                                placeholder="Tell the poster about your availability and experience..." required></textarea>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="meet-requirement" required>
+                            <label class="form-check-label" for="meet-requirement">
+                                I can meet at the listed time and place *
+                            </label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Submit Application</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5 class="fw-bold mb-3">GetItDone</h5>
+                    <p class="text-muted">Connecting people for quick, everyday tasks in your community.</p>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="fw-bold mb-3">Quick Links</h6>
+                    <div class="d-flex flex-column">
+                        <a href="rules.html" class="text-muted text-decoration-none mb-1">Rules & Safety</a>
+                        <a href="about.html" class="text-muted text-decoration-none mb-1">About Us</a>
+                        <a href="browse.html" class="text-muted text-decoration-none mb-1">Browse Tasks</a>
+                        <a href="post.html" class="text-muted text-decoration-none mb-1">Post a Task</a>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <p class="text-muted mb-0">&copy; 2024 GetItDone. Student project for educational purposes.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+    <script>
+        // Additional functions for browse page
+        function clearFilters() {
+            const form = document.getElementById('filter-form');
+            if (form) {
+                form.reset();
+                // Trigger change event to reload tasks
+                const event = new Event('change');
+                form.dispatchEvent(event);
+            }
+        }
+
+        // Handle URL parameters for direct tag filtering
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tagParam = urlParams.get('tag');
+            
+            if (tagParam && window.app) {
+                // Wait for app to initialize, then set the tag filter
+                setTimeout(() => {
+                    const tagCheckbox = document.getElementById(`tag-${tagParam}`);
+                    if (tagCheckbox) {
+                        tagCheckbox.checked = true;
+                        // Trigger change event
+                        const event = new Event('change');
+                        tagCheckbox.dispatchEvent(event);
+                    }
+                }, 100);
+            }
+        });
+    </script>
+</body>
+</html>
+
