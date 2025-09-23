@@ -217,25 +217,49 @@
                     <div class="modal-body">
                         <input type="hidden" id="apply-task-id" name="taskId">
                         
-                        <div class="mb-3">
-                            <label for="helper-name" class="form-label">Your Name *</label>
-                            <input type="text" class="form-control" id="helper-name" name="helperName" required>
+                        <!-- Show login prompt if not logged in -->
+                        <div id="apply-login-prompt" style="display: none;">
+                            <div class="alert alert-info">
+                                <h6 class="alert-heading">
+                                    <i class="bi bi-info-circle me-2"></i>Account Required
+                                </h6>
+                                <p class="mb-3">You need to be logged in to apply for tasks. This helps us keep the platform safe and secure.</p>
+                                <div class="d-grid gap-2">
+                                    <button type="button" class="btn btn-primary" onclick="showLoginModal()">
+                                        <i class="bi bi-box-arrow-in-right me-2"></i>Log In
+                                    </button>
+                                    <button type="button" class="btn btn-outline-primary" onclick="showRegisterModal()">
+                                        <i class="bi bi-person-plus me-2"></i>Create Account
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                         
-                        <div class="mb-3">
-                            <label for="helper-email" class="form-label">Your Email *</label>
-                            <input type="email" class="form-control" id="helper-email" name="helperEmail" required>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="helper-phone" class="form-label">Phone Number (Optional)</label>
-                            <input type="tel" class="form-control" id="helper-phone" name="phone">
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label for="helper-note" class="form-label">Message *</label>
-                            <textarea class="form-control" id="helper-note" name="note" rows="3" 
-                                placeholder="Tell the poster about your availability and experience..." required></textarea>
+                        <!-- Show application form if logged in -->
+                        <div id="apply-form-fields">
+                            <div class="mb-3">
+                                <label for="helper-name" class="form-label">Your Name *</label>
+                                <input type="text" class="form-control" id="helper-name" name="helperName" required readonly>
+                                <div class="form-text">This will be automatically filled from your account</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="helper-email" class="form-label">Your Email *</label>
+                                <input type="email" class="form-control" id="helper-email" name="helperEmail" required readonly>
+                                <div class="form-text">This will be automatically filled from your account</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="helper-phone" class="form-label">Phone Number (Optional)</label>
+                                <input type="tel" class="form-control" id="helper-phone" name="phone" readonly>
+                                <div class="form-text">This will be automatically filled from your account</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="helper-note" class="form-label">Message *</label>
+                                <textarea class="form-control" id="helper-note" name="note" rows="3" 
+                                    placeholder="Tell the poster about your availability and experience..." required></textarea>
+                            </div>
                         </div>
                         
                         <div class="form-check">
@@ -255,27 +279,77 @@
     </div>
 
     <!-- Footer -->
-    <footer class="bg-dark text-white py-4 mt-5">
+    <footer class="bg-dark text-light py-5 mt-5">
         <div class="container">
             <div class="row">
-                <div class="col-md-6">
-                    <h5 class="fw-bold mb-3">GetItDone</h5>
-                    <p class="text-muted">Connecting people for quick, everyday tasks in your community.</p>
-                </div>
-                <div class="col-md-6">
-                    <h6 class="fw-bold mb-3">Quick Links</h6>
-                    <div class="d-flex flex-column">
-                        <a href="rules.html" class="text-muted text-decoration-none mb-1">Rules & Safety</a>
-                        <a href="about.html" class="text-muted text-decoration-none mb-1">About Us</a>
-                        <a href="browse.html" class="text-muted text-decoration-none mb-1">Browse Tasks</a>
-                        <a href="post.html" class="text-muted text-decoration-none mb-1">Post a Task</a>
+                <div class="col-lg-4 mb-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-check-circle-fill text-primary me-2 fs-4"></i>
+                        <h5 class="mb-0 fw-bold">GetItDone</h5>
+                    </div>
+                    <p class="text-muted mb-3">Connecting students with tasks that need to be done. A platform built by students, for students.</p>
+                    <div class="d-flex gap-3">
+                        <a href="#" class="text-light fs-5"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="text-light fs-5"><i class="bi bi-twitter"></i></a>
+                        <a href="#" class="text-light fs-5"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="text-light fs-5"><i class="bi bi-linkedin"></i></a>
                     </div>
                 </div>
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6 class="fw-bold mb-3 text-primary">Platform</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="browse.html" class="text-muted text-decoration-none">Browse Tasks</a></li>
+                        <li class="mb-2"><a href="post.html" class="text-muted text-decoration-none">Post a Task</a></li>
+                        <li class="mb-2"><a href="my-stuff.html" class="text-muted text-decoration-none">My Stuff</a></li>
+                        <li class="mb-2"><a href="account.html" class="text-muted text-decoration-none">Account</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6 class="fw-bold mb-3 text-primary">Support</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="rules.html" class="text-muted text-decoration-none">Rules & Safety</a></li>
+                        <li class="mb-2"><a href="about.html" class="text-muted text-decoration-none">About Us</a></li>
+                        <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Help Center</a></li>
+                        <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Contact Support</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6 class="fw-bold mb-3 text-primary">Legal</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Privacy Policy</a></li>
+                        <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Terms of Service</a></li>
+                        <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Cookie Policy</a></li>
+                        <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Community Guidelines</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6 class="fw-bold mb-3 text-primary">Contact</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2 text-muted">
+                            <i class="bi bi-envelope me-2"></i>
+                            <a href="mailto:support@getitdone.com" class="text-muted text-decoration-none">support@getitdone.com</a>
+                        </li>
+                        <li class="mb-2 text-muted">
+                            <i class="bi bi-telephone me-2"></i>
+                            <a href="tel:+15551234567" class="text-muted text-decoration-none">(555) 123-4567</a>
+                        </li>
+                        <li class="mb-2 text-muted">
+                            <i class="bi bi-geo-alt me-2"></i>
+                            <span>University of Alabama<br>Tuscaloosa, AL 35401</span>
+                        </li>
+                    </ul>
+                </div>
             </div>
-            <hr class="my-4">
-            <div class="row">
-                <div class="col-12 text-center">
-                    <p class="text-muted mb-0">&copy; 2024 GetItDone. Student project for educational purposes.</p>
+            <hr class="my-4 border-secondary">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="text-muted mb-0">&copy; 2024 GetItDone. All rights reserved. Student project for educational purposes.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="text-muted mb-0">
+                        <i class="bi bi-shield-check me-1"></i>
+                        Secure & Trusted Platform
+                    </p>
                 </div>
             </div>
         </div>

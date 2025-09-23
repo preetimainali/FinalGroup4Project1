@@ -3,6 +3,7 @@
 class GetItDoneApp {
     constructor() {
         this.currentUser = this.getCurrentUser();
+        this.currentUserData = this.getCurrentUserData();
         this.init();
     }
 
@@ -45,9 +46,56 @@ class GetItDoneApp {
         return localStorage.getItem('getitdone_current_user') || null;
     }
 
+    getCurrentUserData() {
+        const email = this.getCurrentUser();
+        if (email) {
+            return dataManager.getUserByEmail(email);
+        }
+        return null;
+    }
+
     setCurrentUser(email) {
         localStorage.setItem('getitdone_current_user', email);
         this.currentUser = email;
+        this.currentUserData = this.getCurrentUserData();
+        this.updateNavigation();
+    }
+
+    logout() {
+        localStorage.removeItem('getitdone_current_user');
+        this.currentUser = null;
+        this.currentUserData = null;
+        this.updateNavigation();
+        this.showSuccess('Logged out successfully');
+        // Redirect to home page
+        window.location.href = 'index.html';
+    }
+
+    updateNavigation() {
+        const loginLink = document.querySelector('a[onclick="showLoginModal()"]');
+        const userMenu = document.getElementById('user-menu');
+        
+        if (this.currentUser && this.currentUserData) {
+            // Show user menu
+            if (loginLink) {
+                loginLink.style.display = 'none';
+            }
+            if (userMenu) {
+                userMenu.style.display = 'block';
+                const userName = userMenu.querySelector('.user-name');
+                if (userName) {
+                    userName.textContent = this.currentUserData.name;
+                }
+            }
+        } else {
+            // Show login link
+            if (loginLink) {
+                loginLink.style.display = 'block';
+            }
+            if (userMenu) {
+                userMenu.style.display = 'none';
+            }
+        }
     }
 
     // Home Page
@@ -132,16 +180,12 @@ class GetItDoneApp {
         const filterForm = document.getElementById('filter-form');
         if (!filterForm) return;
 
-        // Tag filters
+        // All filter types
         this.setupTagFilters();
-
-        // Status filters
         this.setupStatusFilters();
-
-        // Location filters
+        this.setupJobTypeFilters();
+        this.setupCollegeFilters();
         this.setupLocationFilters();
-
-        // Time filters
         this.setupTimeFilters();
 
         // Apply filters on change
@@ -240,6 +284,44 @@ class GetItDoneApp {
         });
     }
 
+    setupJobTypeFilters() {
+        const container = document.getElementById('job-type-filters');
+        if (!container) return;
+
+        const jobTypes = [
+            { value: 'local', text: 'Local Jobs', icon: 'bi-geo-alt' },
+            { value: 'remote', text: 'Remote Jobs', icon: 'bi-laptop' }
+        ];
+
+        container.innerHTML = '';
+        jobTypes.forEach(jobType => {
+            const checkbox = document.createElement('div');
+            checkbox.className = 'form-check';
+            checkbox.innerHTML = `
+                <input class="form-check-input" type="checkbox" id="job-type-${jobType.value}" value="${jobType.value}">
+                <label class="form-check-label" for="job-type-${jobType.value}">
+                    <i class="bi ${jobType.icon} me-2"></i>${jobType.text}
+                </label>
+            `;
+            container.appendChild(checkbox);
+        });
+    }
+
+    setupCollegeFilters() {
+        const collegeSelect = document.getElementById('college-filter');
+        if (!collegeSelect) return;
+
+        const colleges = dataManager.getUSColleges();
+        collegeSelect.innerHTML = '<option value="">All colleges</option>';
+        
+        colleges.forEach(college => {
+            const option = document.createElement('option');
+            option.value = college;
+            option.textContent = college;
+            collegeSelect.appendChild(option);
+        });
+    }
+
     setupSearch() {
         const searchInput = document.getElementById('search-input');
         if (!searchInput) return;
@@ -273,7 +355,19 @@ class GetItDoneApp {
             filters.status = statuses;
         }
 
-        // Get location filter
+        // Get selected job types
+        const jobTypeCheckboxes = form.querySelectorAll('input[id^="job-type-"]:checked');
+        if (jobTypeCheckboxes.length > 0) {
+            filters.jobType = Array.from(jobTypeCheckboxes).map(cb => cb.value);
+        }
+
+        // Get college filter
+        const college = formData.get('college');
+        if (college) {
+            filters.college = [college];
+        }
+
+        // Get location filter (legacy)
         const location = formData.get('location');
         if (location) {
             filters.location = location;
@@ -380,6 +474,18 @@ class GetItDoneApp {
     // Post Task Page
     initPostPage() {
         this.setupPostForm();
+        this.updatePostPageUserInfo();
+    }
+
+    updatePostPageUserInfo() {
+        const userInfoNotice = document.getElementById('user-info-notice');
+        if (userInfoNotice) {
+            if (this.currentUser && this.currentUserData) {
+                userInfoNotice.innerHTML = `Logged in as <strong>${this.currentUserData.name}</strong> (${this.currentUser})`;
+            } else {
+                userInfoNotice.textContent = 'Please log in to post a task.';
+            }
+        }
     }
 
     setupPostForm() {
@@ -454,6 +560,13 @@ class GetItDoneApp {
     }
 
     handlePostTask(form) {
+        // Check if user is logged in
+        if (!this.currentUser) {
+            this.showError('Please log in to post a task');
+            this.showLoginModal();
+            return;
+        }
+
         const formData = new FormData(form);
         
         // Get selected tags
@@ -471,10 +584,14 @@ class GetItDoneApp {
             payAmount: parseInt(formData.get('payAmount')),
             date: formData.get('date'),
             timeWindow: formData.get('timeWindow'),
+            jobType: formData.get('jobType'),
+            college: formData.get('college') || '',
             locationType: formData.get('locationType'),
-            locationName: formData.get('locationName'),
-            posterName: formData.get('posterName'),
-            posterEmail: formData.get('posterEmail')
+            locationName: formData.get('jobType') === 'remote' ? formData.get('remoteLocationName') : formData.get('locationName'),
+            address: formData.get('address') || '',
+            coordinates: null, // Will be set if needed for local jobs
+            posterName: this.currentUserData.name,
+            posterEmail: this.currentUser
         };
 
         // Validate required fields
@@ -484,9 +601,6 @@ class GetItDoneApp {
 
         // Add task
         const newTask = dataManager.addTask(taskData);
-        
-        // Set current user
-        this.setCurrentUser(taskData.posterEmail);
 
         // Show success message
         this.showSuccess('Task posted successfully!');
@@ -498,11 +612,31 @@ class GetItDoneApp {
     }
 
     validateTaskData(data) {
-        const required = ['title', 'description', 'payAmount', 'date', 'timeWindow', 'locationName', 'posterName', 'posterEmail'];
+        const required = ['title', 'description', 'payAmount', 'date', 'timeWindow', 'jobType', 'posterName', 'posterEmail'];
         
         for (const field of required) {
             if (!data[field]) {
                 this.showError(`Please fill in the ${field} field`);
+                return false;
+            }
+        }
+
+        // Additional validation for local jobs
+        if (data.jobType === 'local') {
+            if (!data.locationName) {
+                this.showError('Location name is required for local jobs');
+                return false;
+            }
+            if (!data.address) {
+                this.showError('Address is required for local jobs');
+                return false;
+            }
+        }
+
+        // Additional validation for remote jobs
+        if (data.jobType === 'remote') {
+            if (!data.locationName) {
+                this.showError('Platform/Details is required for remote jobs');
                 return false;
             }
         }
@@ -522,7 +656,7 @@ class GetItDoneApp {
 
     loadMyStuff() {
         if (!this.currentUser) {
-            this.showUserPrompt();
+            this.showLoginPrompt();
             return;
         }
 
@@ -530,42 +664,34 @@ class GetItDoneApp {
         this.loadMyApplications();
     }
 
-    showUserPrompt() {
+    showLoginPrompt() {
         const container = document.getElementById('my-stuff-content');
         if (!container) return;
 
         container.innerHTML = `
             <div class="text-center py-5">
-                <h3>Enter your email to view your tasks</h3>
-                <div class="row justify-content-center">
-                    <div class="col-md-6">
-                        <div class="input-group">
-                            <input type="email" class="form-control" id="user-email-input" placeholder="your@email.com">
-                            <button class="btn btn-primary" onclick="app.setUserAndLoad()">Load My Stuff</button>
-                        </div>
-                    </div>
-                </div>
+                <h3>Please log in to view your tasks</h3>
+                <p class="text-muted mb-4">You need to be logged in to see your posted tasks and applications.</p>
+                <button class="btn btn-primary" onclick="showLoginModal()">Log In</button>
+                <button class="btn btn-outline-primary ms-2" onclick="showRegisterModal()">Sign Up</button>
             </div>
         `;
     }
 
-    setUserAndLoad() {
-        const emailInput = document.getElementById('user-email-input');
-        if (!emailInput || !emailInput.value) {
-            this.showError('Please enter your email');
+    loadMyPostedTasks() {
+        const container = document.getElementById('my-posted-tasks');
+        if (!container) {
+            console.log('My posted tasks container not found');
             return;
         }
 
-        this.setCurrentUser(emailInput.value);
-        this.loadMyStuff();
-    }
-
-    loadMyPostedTasks() {
-        const container = document.getElementById('my-posted-tasks');
-        if (!container) return;
-
-        const myTasks = dataManager.getAllTasks()
-            .filter(task => task.posterEmail === this.currentUser);
+        console.log('Loading posted tasks for user:', this.currentUser);
+        
+        const allTasks = dataManager.getAllTasks();
+        console.log('All tasks:', allTasks);
+        
+        const myTasks = allTasks.filter(task => task.posterEmail === this.currentUser);
+        console.log('My tasks:', myTasks);
 
         container.innerHTML = '';
 
@@ -573,6 +699,9 @@ class GetItDoneApp {
             container.innerHTML = '<p class="text-muted">You haven\'t posted any tasks yet.</p>';
             return;
         }
+
+        // Sort tasks by creation date (newest first)
+        myTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
         myTasks.forEach(task => {
             const taskElement = this.createMyTaskElement(task);
@@ -603,32 +732,65 @@ class GetItDoneApp {
     showApplyModal(taskId) {
         const modal = new bootstrap.Modal(document.getElementById('apply-modal'));
         document.getElementById('apply-task-id').value = taskId;
+        
+        // Show/hide appropriate sections based on login status
+        const loginPrompt = document.getElementById('apply-login-prompt');
+        const formFields = document.getElementById('apply-form-fields');
+        
+        if (this.currentUser && this.currentUserData) {
+            // User is logged in - show form and auto-fill
+            loginPrompt.style.display = 'none';
+            formFields.style.display = 'block';
+            
+            // Auto-fill user information
+            document.getElementById('helper-name').value = this.currentUserData.name;
+            document.getElementById('helper-email').value = this.currentUser;
+            document.getElementById('helper-phone').value = this.currentUserData.phone || '';
+        } else {
+            // User is not logged in - show login prompt
+            loginPrompt.style.display = 'block';
+            formFields.style.display = 'none';
+        }
+        
         modal.show();
     }
 
     handleApply(form) {
+        // Check if user is logged in
+        if (!this.currentUser) {
+            this.showError('Please log in to apply for a task');
+            this.showLoginModal();
+            return;
+        }
+
         const formData = new FormData(form);
         const taskId = parseInt(formData.get('taskId'));
 
         const applicationData = {
             taskId: taskId,
-            helperName: formData.get('helperName'),
-            helperEmail: formData.get('helperEmail'),
+            helperName: this.currentUserData.name,
+            helperEmail: this.currentUser,
             note: formData.get('note'),
-            phone: formData.get('phone')
+            phone: this.currentUserData.phone
         };
 
         // Validate
-        if (!applicationData.helperName || !applicationData.helperEmail || !applicationData.note) {
-            this.showError('Please fill in all required fields');
+        if (!applicationData.note) {
+            this.showError('Please provide a note explaining why you\'re a good fit for this task');
+            return;
+        }
+
+        // Check if user already applied
+        const existingApplications = dataManager.getApplicationsByHelperEmail(this.currentUser);
+        const alreadyApplied = existingApplications.some(app => app.taskId === taskId);
+        
+        if (alreadyApplied) {
+            this.showError('You have already applied for this task');
             return;
         }
 
         // Add application
         dataManager.addApplication(applicationData);
-
-        // Set current user
-        this.setCurrentUser(applicationData.helperEmail);
 
         // Close modal
         const modal = bootstrap.Modal.getInstance(document.getElementById('apply-modal'));
@@ -649,8 +811,12 @@ class GetItDoneApp {
         const statusClass = `status-${task.status}`;
         const statusText = task.status.charAt(0).toUpperCase() + task.status.slice(1).replace('_', ' ');
 
+        // Generate random pastel class for variety
+        const pastelClasses = ['card-pastel-blue', 'card-pastel-green', 'card-pastel-purple', 'card-pastel-pink', 'card-pastel-yellow', 'card-pastel-orange'];
+        const randomPastelClass = pastelClasses[Math.floor(Math.random() * pastelClasses.length)];
+
         col.innerHTML = `
-            <div class="card task-card h-100">
+            <div class="card task-card h-100 ${randomPastelClass}">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <h5 class="card-title task-title">${task.title}</h5>
@@ -660,7 +826,8 @@ class GetItDoneApp {
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <span class="task-pay">$${task.payAmount}</span>
                         <small class="task-location">
-                            <i class="bi bi-geo-alt me-1"></i>${task.locationName}
+                            <i class="bi ${task.jobType === 'remote' ? 'bi-laptop' : 'bi-geo-alt'} me-1"></i>
+                            ${task.jobType === 'remote' ? 'Remote' : (task.college ? task.college.split(' - ')[0] : task.locationName)}
                         </small>
                     </div>
                     <div class="mb-3">
@@ -710,6 +877,10 @@ class GetItDoneApp {
         
         const statusClass = `status-${task.status}`;
         const statusText = task.status.charAt(0).toUpperCase() + task.status.slice(1).replace('_', ' ');
+        
+        // Get application count for this task
+        const applications = dataManager.getApplicationsByTaskId(task.id);
+        const applicationCount = applications.length;
 
         div.innerHTML = `
             <div class="card-body">
@@ -718,10 +889,22 @@ class GetItDoneApp {
                     <span class="status-badge ${statusClass}">${statusText}</span>
                 </div>
                 <p class="card-text text-muted">${task.description.substring(0, 150)}${task.description.length > 150 ? '...' : ''}</p>
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <small class="text-muted">
+                            <i class="bi bi-calendar me-1"></i>Posted: ${this.formatDate(task.createdAt)}
+                        </small>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted">
+                            <i class="bi bi-people me-1"></i>${applicationCount} application${applicationCount !== 1 ? 's' : ''}
+                        </small>
+                    </div>
+                </div>
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <span class="badge bg-success me-2">$${task.payAmount}</span>
-                        <small class="text-muted">${this.formatDate(task.date)}</small>
+                        <small class="text-muted">Due: ${this.formatDate(task.date)}</small>
                     </div>
                     <a href="task-detail.html?id=${task.id}" class="btn btn-outline-primary btn-sm">View Details</a>
                 </div>
@@ -814,6 +997,95 @@ class GetItDoneApp {
     initCommonFeatures() {
         // Initialize any common features that apply to all pages
         this.setupApplyModal();
+        this.setupLoginModal();
+        this.setupRegisterModal();
+        this.updateNavigation();
+    }
+
+    setupLoginModal() {
+        const form = document.getElementById('login-form');
+        if (!form) return;
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleLogin(form);
+        });
+    }
+
+    setupRegisterModal() {
+        const form = document.getElementById('register-form');
+        if (!form) return;
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.handleRegister(form);
+        });
+    }
+
+    handleLogin(form) {
+        const formData = new FormData(form);
+        const email = formData.get('email');
+        const password = formData.get('password');
+
+        if (!email || !password) {
+            this.showError('Please fill in all fields');
+            return;
+        }
+
+        const user = dataManager.authenticateUser(email, password);
+        if (user) {
+            this.setCurrentUser(email);
+            const modal = bootstrap.Modal.getInstance(document.getElementById('login-modal'));
+            modal.hide();
+            this.showSuccess(`Welcome back, ${user.name}!`);
+            form.reset();
+        } else {
+            this.showError('Invalid email or password');
+        }
+    }
+
+    handleRegister(form) {
+        const formData = new FormData(form);
+        const userData = {
+            email: formData.get('email'),
+            name: formData.get('name'),
+            phone: formData.get('phone'),
+            password: formData.get('password')
+        };
+
+        // Validate required fields
+        if (!userData.email || !userData.name || !userData.password) {
+            this.showError('Please fill in all required fields');
+            return;
+        }
+
+        // Check if user already exists
+        if (dataManager.getUserByEmail(userData.email)) {
+            this.showError('An account with this email already exists');
+            return;
+        }
+
+        // Validate email format
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(userData.email)) {
+            this.showError('Please enter a valid email address');
+            return;
+        }
+
+        // Validate password length
+        if (userData.password.length < 6) {
+            this.showError('Password must be at least 6 characters long');
+            return;
+        }
+
+        // Add user
+        const newUser = dataManager.addUser(userData);
+        this.setCurrentUser(newUser.email);
+        
+        const modal = bootstrap.Modal.getInstance(document.getElementById('register-modal'));
+        modal.hide();
+        this.showSuccess(`Welcome to GetItDone, ${newUser.name}!`);
+        form.reset();
     }
 
     setupApplyModal() {
@@ -844,6 +1116,20 @@ function removeTag(tag) {
 
 function showApplyModal(taskId) {
     app.showApplyModal(taskId);
+}
+
+function showLoginModal() {
+    const modal = new bootstrap.Modal(document.getElementById('login-modal'));
+    modal.show();
+}
+
+function showRegisterModal() {
+    const modal = new bootstrap.Modal(document.getElementById('register-modal'));
+    modal.show();
+}
+
+function logout() {
+    app.logout();
 }
 
 // Initialize app when DOM is loaded
