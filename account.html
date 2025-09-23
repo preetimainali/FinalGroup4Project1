@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Settings - GetItDone</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-primary" href="index.html">
+                <i class="bi bi-check-circle-fill me-2"></i>GetItDone
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="browse.html">Browse Tasks</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="post.html">Post a Task</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="my-stuff.html">My Stuff</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="rules.html">Rules & Safety</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="about.html">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showLoginModal()">Login</a>
+                    </li>
+                    <li class="nav-item" id="user-menu" style="display: none;">
+                        <div class="dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <div class="user-avatar me-2">
+                                    <i class="bi bi-person-circle fs-4"></i>
+                                </div>
+                                <span class="user-name d-none d-md-inline"></span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><h6 class="dropdown-header">
+                                    <div class="user-avatar-small me-2 d-inline-block">
+                                        <i class="bi bi-person-circle"></i>
+                                    </div>
+                                    <span class="user-name"></span>
+                                </h6></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="my-stuff.html">
+                                    <i class="bi bi-briefcase me-2"></i>My Stuff
+                                </a></li>
+                                <li><a class="dropdown-item" href="account.html">
+                                    <i class="bi bi-gear me-2"></i>Account Settings
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" onclick="logout()">
+                                    <i class="bi bi-box-arrow-right me-2"></i>Logout
+                                </a></li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container py-4">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Account Settings</li>
+            </ol>
+        </nav>
+
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <!-- Header -->
+                <div class="text-center mb-5">
+                    <div class="user-avatar mb-3">
+                        <i class="bi bi-person-circle display-1"></i>
+                    </div>
+                    <h1 class="display-5 fw-bold mb-3">Account Settings</h1>
+                    <p class="lead text-muted">Manage your profile and account preferences.</p>
+                </div>
+
+                <!-- Account Info -->
+                <div id="account-content">
+                    <!-- Profile Information -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-person me-2"></i>Profile Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="profile-form">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="profile-name" class="form-label">Full Name</label>
+                                        <input type="text" class="form-control" id="profile-name" name="name" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="profile-email" class="form-label">Email Address</label>
+                                        <input type="email" class="form-control" id="profile-email" name="email" readonly>
+                                        <div class="form-text">Email cannot be changed</div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="profile-phone" class="form-label">Phone Number</label>
+                                        <input type="tel" class="form-control" id="profile-phone" name="phone">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="profile-joined" class="form-label">Member Since</label>
+                                        <input type="text" class="form-control" id="profile-joined" readonly>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-end">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-check-lg me-2"></i>Save Changes
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Change Password -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-shield-lock me-2"></i>Change Password</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="password-form">
+                                <div class="mb-3">
+                                    <label for="current-password" class="form-label">Current Password</label>
+                                    <input type="password" class="form-control" id="current-password" name="currentPassword" required>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="new-password" class="form-label">New Password</label>
+                                        <input type="password" class="form-control" id="new-password" name="newPassword" required minlength="6">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="confirm-password" class="form-label">Confirm New Password</label>
+                                        <input type="password" class="form-control" id="confirm-password" name="confirmPassword" required minlength="6">
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-end">
+                                    <button type="submit" class="btn btn-warning">
+                                        <i class="bi bi-key me-2"></i>Change Password
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Account Statistics -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Account Statistics</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center">
+                                <div class="col-md-4 mb-3">
+                                    <div class="border rounded p-3">
+                                        <i class="bi bi-briefcase text-primary fs-1 mb-2"></i>
+                                        <h4 class="h3 fw-bold" id="stats-tasks-posted">0</h4>
+                                        <p class="text-muted mb-0">Tasks Posted</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="border rounded p-3">
+                                        <i class="bi bi-clipboard-check text-success fs-1 mb-2"></i>
+                                        <h4 class="h3 fw-bold" id="stats-applications">0</h4>
+                                        <p class="text-muted mb-0">Applications</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <div class="border rounded p-3">
+                                        <i class="bi bi-star text-warning fs-1 mb-2"></i>
+                                        <h4 class="h3 fw-bold" id="stats-rating">-</h4>
+                                        <p class="text-muted mb-0">Average Rating</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Account Actions -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0"><i class="bi bi-gear me-2"></i>Account Actions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex flex-column flex-md-row gap-3">
+                                <button class="btn btn-outline-primary" onclick="exportData()">
+                                    <i class="bi bi-download me-2"></i>Export My Data
+                                </button>
+                                <button class="btn btn-outline-warning" onclick="showDeleteModal()">
+                                    <i class="bi bi-trash me-2"></i>Delete Account
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Login Prompt -->
+                <div id="login-prompt" style="display: none;">
+                    <div class="text-center py-5">
+                        <div class="user-avatar mb-3">
+                            <i class="bi bi-person-circle display-1 text-muted"></i>
+                        </div>
+                        <h3>Please log in to manage your account</h3>
+                        <p class="text-muted mb-4">You need to be logged in to view and edit your account settings.</p>
+                        <button class="btn btn-primary" onclick="showLoginModal()">Log In</button>
+                        <button class="btn btn-outline-primary ms-2" onclick="showRegisterModal()">Sign Up</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Account Modal -->
+    <div class="modal fade" id="delete-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-danger">Delete Account</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-danger">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        <strong>Warning:</strong> This action cannot be undone. All your data will be permanently deleted.
+                    </div>
+                    <p>Are you sure you want to delete your account? This will:</p>
+                    <ul>
+                        <li>Delete your profile information</li>
+                        <li>Remove all your posted tasks</li>
+                        <li>Cancel all your applications</li>
+                        <li>Permanently delete your account</li>
+                    </ul>
+                    <div class="mb-3">
+                        <label for="delete-confirm" class="form-label">Type "DELETE" to confirm:</label>
+                        <input type="text" class="form-control" id="delete-confirm" placeholder="DELETE">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" onclick="deleteAccount()">Delete Account</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal fade" id="login-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Log In</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="login-form">
+                        <div class="mb-3">
+                            <label for="login-email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="login-email" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="login-password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="login-password" name="password" required>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Log In</button>
+                        </div>
+                    </form>
+                    <div class="text-center mt-3">
+                        <p class="mb-0">Don't have an account? <a href="#" onclick="showRegisterModal()">Sign up</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div class="modal fade" id="register-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Sign Up</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="register-form">
+                        <div class="mb-3">
+                            <label for="register-name" class="form-label">Full Name *</label>
+                            <input type="text" class="form-control" id="register-name" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="register-email" class="form-label">Email *</label>
+                            <input type="email" class="form-control" id="register-email" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="register-phone" class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="register-phone" name="phone">
+                        </div>
+                        <div class="mb-3">
+                            <label for="register-password" class="form-label">Password *</label>
+                            <input type="password" class="form-control" id="register-password" name="password" required minlength="6">
+                            <div class="form-text">Password must be at least 6 characters long.</div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Sign Up</button>
+                        </div>
+                    </form>
+                    <div class="text-center mt-3">
+                        <p class="mb-0">Already have an account? <a href="#" onclick="showLoginModal()">Log in</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+    <script>
+        // Account page specific functionality
+        function loadAccountData() {
+            if (!app.currentUser) {
+                document.getElementById('account-content').style.display = 'none';
+                document.getElementById('login-prompt').style.display = 'block';
+                return;
+            }
+
+            const user = app.currentUserData;
+            if (user) {
+                // Populate profile form
+                document.getElementById('profile-name').value = user.name || '';
+                document.getElementById('profile-email').value = user.email || '';
+                document.getElementById('profile-phone').value = user.phone || '';
+                document.getElementById('profile-joined').value = new Date(user.createdAt).toLocaleDateString();
+
+                // Load statistics
+                loadAccountStatistics();
+            }
+        }
+
+        function loadAccountStatistics() {
+            const tasks = dataManager.getAllTasks().filter(task => task.posterEmail === app.currentUser);
+            const applications = dataManager.getApplicationsByHelperEmail(app.currentUser);
+
+            document.getElementById('stats-tasks-posted').textContent = tasks.length;
+            document.getElementById('stats-applications').textContent = applications.length;
+            
+            // Calculate average rating (placeholder for now)
+            document.getElementById('stats-rating').textContent = '4.8';
+        }
+
+        function showDeleteModal() {
+            const modal = new bootstrap.Modal(document.getElementById('delete-modal'));
+            modal.show();
+        }
+
+        function deleteAccount() {
+            const confirmInput = document.getElementById('delete-confirm');
+            if (confirmInput.value !== 'DELETE') {
+                app.showError('Please type "DELETE" to confirm');
+                return;
+            }
+
+            // Delete user data
+            const users = dataManager.getAllUsers();
+            const updatedUsers = users.filter(user => user.email !== app.currentUser);
+            localStorage.setItem('getitdone_users', JSON.stringify(updatedUsers));
+
+            // Delete user's tasks
+            const tasks = dataManager.getAllTasks();
+            const updatedTasks = tasks.filter(task => task.posterEmail !== app.currentUser);
+            localStorage.setItem('getitdone_tasks', JSON.stringify(updatedTasks));
+
+            // Delete user's applications
+            const applications = dataManager.getAllApplications();
+            const updatedApplications = applications.filter(app => app.helperEmail !== app.currentUser);
+            localStorage.setItem('getitdone_applications', JSON.stringify(updatedApplications));
+
+            // Logout and redirect
+            app.logout();
+            app.showSuccess('Account deleted successfully');
+        }
+
+        function exportData() {
+            const user = app.currentUserData;
+            const tasks = dataManager.getAllTasks().filter(task => task.posterEmail === app.currentUser);
+            const applications = dataManager.getApplicationsByHelperEmail(app.currentUser);
+
+            const exportData = {
+                user: user,
+                tasks: tasks,
+                applications: applications,
+                exportedAt: new Date().toISOString()
+            };
+
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `getitdone-data-${user.email}-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            app.showSuccess('Data exported successfully');
+        }
+
+        // Initialize account page
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAccountData();
+            
+            // Setup profile form
+            document.getElementById('profile-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const updates = {
+                    name: formData.get('name'),
+                    phone: formData.get('phone')
+                };
+                
+                const user = app.currentUserData;
+                if (user) {
+                    dataManager.updateUser(user.id, updates);
+                    app.currentUserData = dataManager.getUserByEmail(app.currentUser);
+                    app.showSuccess('Profile updated successfully');
+                }
+            });
+
+            // Setup password form
+            document.getElementById('password-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const currentPassword = formData.get('currentPassword');
+                const newPassword = formData.get('newPassword');
+                const confirmPassword = formData.get('confirmPassword');
+
+                if (newPassword !== confirmPassword) {
+                    app.showError('New passwords do not match');
+                    return;
+                }
+
+                const user = app.currentUserData;
+                if (user && user.password === currentPassword) {
+                    dataManager.updateUser(user.id, { password: newPassword });
+                    app.showSuccess('Password changed successfully');
+                    e.target.reset();
+                } else {
+                    app.showError('Current password is incorrect');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -41,6 +41,38 @@
                     <li class="nav-item">
                         <a class="nav-link" href="about.html">About</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showLoginModal()">Login</a>
+                    </li>
+                    <li class="nav-item" id="user-menu" style="display: none;">
+                        <div class="dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <div class="user-avatar me-2">
+                                    <i class="bi bi-person-circle fs-4"></i>
+                                </div>
+                                <span class="user-name d-none d-md-inline"></span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><h6 class="dropdown-header">
+                                    <div class="user-avatar-small me-2 d-inline-block">
+                                        <i class="bi bi-person-circle"></i>
+                                    </div>
+                                    <span class="user-name"></span>
+                                </h6></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="my-stuff.html">
+                                    <i class="bi bi-briefcase me-2"></i>My Stuff
+                                </a></li>
+                                <li><a class="dropdown-item" href="account.html">
+                                    <i class="bi bi-gear me-2"></i>Account Settings
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" onclick="logout()">
+                                    <i class="bi bi-box-arrow-right me-2"></i>Logout
+                                </a></li>
+                            </ul>
+                        </div>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -112,26 +144,122 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label for="time-window" class="form-label fw-bold">Time Window *</label>
-                                    <input type="text" class="form-control" id="time-window" name="timeWindow" 
-                                        placeholder="e.g., 2:00 PM - 4:00 PM" required>
+                                    <select class="form-select" id="time-window" name="timeWindow" required>
+                                        <option value="">Select time window</option>
+                                        <option value="Early Morning (6:00 AM - 9:00 AM)">Early Morning (6:00 AM - 9:00 AM)</option>
+                                        <option value="Morning (9:00 AM - 12:00 PM)">Morning (9:00 AM - 12:00 PM)</option>
+                                        <option value="Afternoon (12:00 PM - 3:00 PM)">Afternoon (12:00 PM - 3:00 PM)</option>
+                                        <option value="Late Afternoon (3:00 PM - 6:00 PM)">Late Afternoon (3:00 PM - 6:00 PM)</option>
+                                        <option value="Evening (6:00 PM - 9:00 PM)">Evening (6:00 PM - 9:00 PM)</option>
+                                        <option value="Night (9:00 PM - 12:00 AM)">Night (9:00 PM - 12:00 AM)</option>
+                                        <option value="Late Night (12:00 AM - 6:00 AM)">Late Night (12:00 AM - 6:00 AM)</option>
+                                        <option value="Flexible - Any Time">Flexible - Any Time</option>
+                                        <option value="Custom">Custom (specify in description)</option>
+                                    </select>
                                 </div>
                             </div>
 
-                            <!-- Location -->
-                            <div class="row mb-4">
+                            <!-- Job Type -->
+                            <div class="mb-4">
+                                <h5 class="fw-bold mb-3">Job Type</h5>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="jobType" id="job-type-local" value="local" checked>
+                                            <label class="form-check-label" for="job-type-local">
+                                                <i class="bi bi-geo-alt me-2"></i>Local Job
+                                                <small class="d-block text-muted">Requires in-person work</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="jobType" id="job-type-remote" value="remote">
+                                            <label class="form-check-label" for="job-type-remote">
+                                                <i class="bi bi-laptop me-2"></i>Remote Job
+                                                <small class="d-block text-muted">Can be done online/from home</small>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Location Information -->
+                            <div class="mb-4" id="location-section">
+                                <h5 class="fw-bold mb-3">Location Information</h5>
+                                
+                                <!-- Local Job Location Details -->
+                                <div id="local-location-details">
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="college" class="form-label fw-bold">College/University</label>
+                                            <select class="form-select" id="college" name="college">
+                                                <option value="">Select college (optional)</option>
+                                            </select>
+                                            <div class="form-text">Helps students find jobs at their school</div>
+                                        </div>
                                 <div class="col-md-6">
                                     <label for="location-type" class="form-label fw-bold">Location Type *</label>
                                     <select class="form-select" id="location-type" name="locationType" required>
                                         <option value="">Select location type</option>
-                                        <option value="Campus">Campus Building</option>
-                                        <option value="Apartment">Apartment Complex</option>
+                                                <option value="Campus">Campus</option>
+                                                <option value="Apartment">Apartment</option>
+                                                <option value="House">House</option>
+                                                <option value="Business">Business</option>
                                         <option value="Other">Other</option>
                                     </select>
                                 </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="location-name" class="form-label fw-bold">Specific Location *</label>
+                                            <input type="text" class="form-control" id="location-name" name="locationName" 
+                                                placeholder="e.g., Student Center, Lakeside Apartments" required>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="address" class="form-label fw-bold">Address *</label>
+                                            <div class="address-input-container">
+                                                <input type="text" class="form-control" id="address" name="address" 
+                                                    placeholder="Start typing an address..." required autocomplete="off">
+                                                <div id="address-suggestions" class="address-suggestions"></div>
+                                            </div>
+                                            <div class="form-text">Full address for the job location</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Remote Job Details -->
+                                <div id="remote-location-details" style="display: none;">
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="college-remote" class="form-label fw-bold">College/University</label>
+                                            <select class="form-select" id="college-remote" name="college">
+                                                <option value="">Select college (optional)</option>
+                                            </select>
+                                            <div class="form-text">Helps students find remote jobs from their school</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="remote-location-type" class="form-label fw-bold">Remote Type *</label>
+                                            <select class="form-select" id="remote-location-type" name="locationType">
+                                                <option value="Remote">Remote Work</option>
+                                                <option value="Video Call">Video Call</option>
+                                                <option value="Phone Call">Phone Call</option>
+                                                <option value="Online Platform">Online Platform</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-3">
+                                        <div class="col-md-6">
+                                            <label for="remote-location-name" class="form-label fw-bold">Platform/Details *</label>
+                                            <input type="text" class="form-control" id="remote-location-name" name="remoteLocationName" 
+                                                placeholder="e.g., Zoom, Google Meet, Phone" required>
+                                </div>
                                 <div class="col-md-6">
-                                    <label for="location-name" class="form-label fw-bold">Location Name *</label>
-                                    <input type="text" class="form-control" id="location-name" name="locationName" 
-                                        placeholder="e.g., Student Center, Lakeside Apts" required>
+                                            <label for="address-remote" class="form-label fw-bold">Address</label>
+                                            <input type="text" class="form-control" id="address-remote" name="address" 
+                                                value="Remote" readonly>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -159,18 +287,12 @@
                                 </div>
                             </div>
 
-                            <!-- Contact Information -->
+                            <!-- User Information Notice -->
                             <div class="mb-4">
-                                <h5 class="fw-bold mb-3">Your Contact Information</h5>
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <label for="poster-name" class="form-label fw-bold">Your Name *</label>
-                                        <input type="text" class="form-control" id="poster-name" name="posterName" required>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label for="poster-email" class="form-label fw-bold">Your Email *</label>
-                                        <input type="email" class="form-control" id="poster-email" name="posterEmail" required>
-                                    </div>
+                                <div class="alert alert-info">
+                                    <i class="bi bi-info-circle me-2"></i>
+                                    <strong>Note:</strong> Your name and email will be automatically used from your account. 
+                                    <span id="user-info-notice">Please log in to post a task.</span>
                                 </div>
                             </div>
 
@@ -267,27 +389,77 @@
     </div>
 
     <!-- Footer -->
-    <footer class="bg-dark text-white py-4 mt-5">
+    <footer class="bg-dark text-light py-5 mt-5">
         <div class="container">
             <div class="row">
-                <div class="col-md-6">
-                    <h5 class="fw-bold mb-3">GetItDone</h5>
-                    <p class="text-muted">Connecting people for quick, everyday tasks in your community.</p>
+                <div class="col-lg-4 mb-4">
+                    <div class="d-flex align-items-center mb-3">
+                        <i class="bi bi-check-circle-fill text-primary me-2 fs-4"></i>
+                        <h5 class="mb-0 fw-bold">GetItDone</h5>
                 </div>
-                <div class="col-md-6">
-                    <h6 class="fw-bold mb-3">Quick Links</h6>
-                    <div class="d-flex flex-column">
-                        <a href="rules.html" class="text-muted text-decoration-none mb-1">Rules & Safety</a>
-                        <a href="about.html" class="text-muted text-decoration-none mb-1">About Us</a>
-                        <a href="browse.html" class="text-muted text-decoration-none mb-1">Browse Tasks</a>
-                        <a href="post.html" class="text-muted text-decoration-none mb-1">Post a Task</a>
+                    <p class="text-muted mb-3">Connecting students with tasks that need to be done. A platform built by students, for students.</p>
+                    <div class="d-flex gap-3">
+                        <a href="#" class="text-light fs-5"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="text-light fs-5"><i class="bi bi-twitter"></i></a>
+                        <a href="#" class="text-light fs-5"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="text-light fs-5"><i class="bi bi-linkedin"></i></a>
                     </div>
                 </div>
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6 class="fw-bold mb-3 text-primary">Platform</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="browse.html" class="text-muted text-decoration-none">Browse Tasks</a></li>
+                        <li class="mb-2"><a href="post.html" class="text-muted text-decoration-none">Post a Task</a></li>
+                        <li class="mb-2"><a href="my-stuff.html" class="text-muted text-decoration-none">My Stuff</a></li>
+                        <li class="mb-2"><a href="account.html" class="text-muted text-decoration-none">Account</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6 class="fw-bold mb-3 text-primary">Support</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="rules.html" class="text-muted text-decoration-none">Rules & Safety</a></li>
+                        <li class="mb-2"><a href="about.html" class="text-muted text-decoration-none">About Us</a></li>
+                        <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Help Center</a></li>
+                        <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Contact Support</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6 class="fw-bold mb-3 text-primary">Legal</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Privacy Policy</a></li>
+                        <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Terms of Service</a></li>
+                        <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Cookie Policy</a></li>
+                        <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Community Guidelines</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h6 class="fw-bold mb-3 text-primary">Contact</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2 text-muted">
+                            <i class="bi bi-envelope me-2"></i>
+                            <a href="mailto:support@getitdone.com" class="text-muted text-decoration-none">support@getitdone.com</a>
+                        </li>
+                        <li class="mb-2 text-muted">
+                            <i class="bi bi-telephone me-2"></i>
+                            <a href="tel:+15551234567" class="text-muted text-decoration-none">(555) 123-4567</a>
+                        </li>
+                        <li class="mb-2 text-muted">
+                            <i class="bi bi-geo-alt me-2"></i>
+                            <span>University of Alabama<br>Tuscaloosa, AL 35401</span>
+                        </li>
+                    </ul>
+                </div>
             </div>
-            <hr class="my-4">
-            <div class="row">
-                <div class="col-12 text-center">
-                    <p class="text-muted mb-0">&copy; 2024 GetItDone. Student project for educational purposes.</p>
+            <hr class="my-4 border-secondary">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <p class="text-muted mb-0">&copy; 2024 GetItDone. All rights reserved. Student project for educational purposes.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p class="text-muted mb-0">
+                        <i class="bi bi-shield-check me-1"></i>
+                        Secure & Trusted Platform
+                    </p>
                 </div>
             </div>
         </div>
@@ -317,15 +489,370 @@
             }
         }
 
-        // Set minimum date to today
+        // Set minimum date to today and initialize location form
         document.addEventListener('DOMContentLoaded', () => {
             const dateInput = document.getElementById('task-date');
             if (dateInput) {
                 const today = new Date().toISOString().split('T')[0];
                 dateInput.min = today;
             }
+
+            // Initialize location form
+            initializeLocationForm();
+            
+            // Initialize address autocomplete
+            initializeAddressAutocomplete();
         });
+
+        function initializeLocationForm() {
+            const collegeSelect = document.getElementById('college');
+            const collegeRemoteSelect = document.getElementById('college-remote');
+            const jobTypeRadios = document.querySelectorAll('input[name="jobType"]');
+            const localDetails = document.getElementById('local-location-details');
+            const remoteDetails = document.getElementById('remote-location-details');
+
+            // Populate college dropdowns
+            const colleges = [
+                "University of Alabama - Tuscaloosa",
+                "Auburn University - Auburn",
+                "University of Alabama at Birmingham - Birmingham",
+                "University of South Alabama - Mobile",
+                "Troy University - Troy",
+                "Jacksonville State University - Jacksonville",
+                "University of North Alabama - Florence",
+                "Alabama State University - Montgomery",
+                "University of California - Los Angeles",
+                "University of California - Berkeley",
+                "Stanford University - Stanford",
+                "University of Southern California - Los Angeles",
+                "University of Texas - Austin",
+                "Texas A&M University - College Station",
+                "University of Florida - Gainesville",
+                "Florida State University - Tallahassee",
+                "University of Georgia - Athens",
+                "Georgia Institute of Technology - Atlanta",
+                "University of North Carolina - Chapel Hill",
+                "Duke University - Durham",
+                "North Carolina State University - Raleigh",
+                "University of Virginia - Charlottesville",
+                "Virginia Tech - Blacksburg",
+                "University of Michigan - Ann Arbor",
+                "Michigan State University - East Lansing",
+                "Ohio State University - Columbus",
+                "University of Illinois - Urbana-Champaign",
+                "Northwestern University - Evanston",
+                "University of Wisconsin - Madison",
+                "University of Minnesota - Twin Cities",
+                "University of Washington - Seattle",
+                "University of Oregon - Eugene",
+                "Oregon State University - Corvallis",
+                "University of Colorado - Boulder",
+                "Colorado State University - Fort Collins",
+                "Arizona State University - Tempe",
+                "University of Arizona - Tucson",
+                "University of Utah - Salt Lake City",
+                "Brigham Young University - Provo",
+                "University of Nevada - Las Vegas",
+                "University of New Mexico - Albuquerque",
+                "Texas Tech University - Lubbock",
+                "University of Houston - Houston",
+                "Rice University - Houston",
+                "Baylor University - Waco",
+                "University of Oklahoma - Norman",
+                "Oklahoma State University - Stillwater",
+                "University of Kansas - Lawrence",
+                "Kansas State University - Manhattan",
+                "University of Missouri - Columbia",
+                "Washington University in St. Louis - St. Louis",
+                "University of Iowa - Iowa City",
+                "Iowa State University - Ames",
+                "University of Nebraska - Lincoln",
+                "University of Arkansas - Fayetteville",
+                "University of Tennessee - Knoxville",
+                "Vanderbilt University - Nashville",
+                "University of Kentucky - Lexington",
+                "University of Louisville - Louisville",
+                "West Virginia University - Morgantown",
+                "University of Maryland - College Park",
+                "Johns Hopkins University - Baltimore",
+                "University of Delaware - Newark",
+                "Rutgers University - New Brunswick",
+                "Princeton University - Princeton",
+                "University of Pennsylvania - Philadelphia",
+                "Temple University - Philadelphia",
+                "Penn State University - University Park",
+                "Carnegie Mellon University - Pittsburgh",
+                "University of Pittsburgh - Pittsburgh",
+                "Syracuse University - Syracuse",
+                "Cornell University - Ithaca",
+                "University of Rochester - Rochester",
+                "New York University - New York",
+                "Columbia University - New York",
+                "Yale University - New Haven",
+                "University of Connecticut - Storrs",
+                "Boston University - Boston",
+                "Harvard University - Cambridge",
+                "MIT - Cambridge",
+                "Northeastern University - Boston",
+                "University of Massachusetts - Amherst",
+                "University of Vermont - Burlington",
+                "University of New Hampshire - Durham",
+                "University of Maine - Orono",
+                "University of Rhode Island - Kingston",
+                "Brown University - Providence"
+            ];
+            
+            if (collegeSelect) {
+                colleges.forEach(college => {
+                    const option = document.createElement('option');
+                    option.value = college;
+                    option.textContent = college;
+                    collegeSelect.appendChild(option);
+                });
+            }
+            
+            if (collegeRemoteSelect) {
+                colleges.forEach(college => {
+                    const option = document.createElement('option');
+                    option.value = college;
+                    option.textContent = college;
+                    collegeRemoteSelect.appendChild(option);
+                });
+            }
+
+            // Handle job type change
+            jobTypeRadios.forEach(radio => {
+                radio.addEventListener('change', () => {
+                    if (radio.value === 'local') {
+                        localDetails.style.display = 'block';
+                        remoteDetails.style.display = 'none';
+                        // Set required attributes for local job fields
+                        document.getElementById('location-type').required = true;
+                        document.getElementById('location-name').required = true;
+                        document.getElementById('address').required = true;
+                        document.getElementById('remote-location-type').required = false;
+                        document.getElementById('remote-location-name').required = false;
+                        document.getElementById('address-remote').required = false;
+                    } else if (radio.value === 'remote') {
+                        localDetails.style.display = 'none';
+                        remoteDetails.style.display = 'block';
+                        // Set required attributes for remote job fields
+                        document.getElementById('location-type').required = false;
+                        document.getElementById('location-name').required = false;
+                        document.getElementById('address').required = false;
+                        document.getElementById('remote-location-type').required = true;
+                        document.getElementById('remote-location-name').required = true;
+                        document.getElementById('address-remote').required = false;
+                    }
+                });
+            });
+        }
+
+        function initializeAddressAutocomplete() {
+            const addressInput = document.getElementById('address');
+            const suggestionsContainer = document.getElementById('address-suggestions');
+            
+            if (!addressInput || !suggestionsContainer) return;
+
+            let debounceTimer;
+            let currentSuggestions = [];
+
+            // Sample address data for demonstration
+            const sampleAddresses = [
+                "123 University Blvd, Tuscaloosa, AL 35401",
+                "456 Lakeside Dr, Tuscaloosa, AL 35401",
+                "789 University Blvd, Tuscaloosa, AL 35401",
+                "321 Campus View Dr, Tuscaloosa, AL 35401",
+                "555 Student Center, Tuscaloosa, AL 35401",
+                "1000 University Library, Tuscaloosa, AL 35401",
+                "2000 Riverside Dr, Tuscaloosa, AL 35401",
+                "3000 Lakeside Dr, Tuscaloosa, AL 35401",
+                "4000 Campus View Dr, Tuscaloosa, AL 35401",
+                "5000 University Blvd, Tuscaloosa, AL 35401"
+            ];
+
+            addressInput.addEventListener('input', (e) => {
+                const query = e.target.value.trim();
+                
+                clearTimeout(debounceTimer);
+                
+                if (query.length < 2) {
+                    hideSuggestions();
+                    return;
+                }
+
+                debounceTimer = setTimeout(() => {
+                    showAddressSuggestions(query);
+                }, 300);
+            });
+
+            addressInput.addEventListener('blur', () => {
+                // Delay hiding to allow clicking on suggestions
+                setTimeout(() => {
+                    hideSuggestions();
+                }, 200);
+            });
+
+            addressInput.addEventListener('focus', () => {
+                if (addressInput.value.trim().length >= 2) {
+                    showAddressSuggestions(addressInput.value.trim());
+                }
+            });
+
+            function showAddressSuggestions(query) {
+                const filteredAddresses = sampleAddresses.filter(addr => 
+                    addr.toLowerCase().includes(query.toLowerCase())
+                );
+
+                if (filteredAddresses.length === 0) {
+                    hideSuggestions();
+                    return;
+                }
+
+                currentSuggestions = filteredAddresses;
+                displaySuggestions(filteredAddresses);
+            }
+
+            function displaySuggestions(addresses) {
+                suggestionsContainer.innerHTML = '';
+                
+                addresses.forEach((address, index) => {
+                    const suggestion = document.createElement('div');
+                    suggestion.className = 'address-suggestion';
+                    suggestion.textContent = address;
+                    suggestion.addEventListener('click', () => {
+                        addressInput.value = address;
+                        hideSuggestions();
+                    });
+                    suggestionsContainer.appendChild(suggestion);
+                });
+
+                suggestionsContainer.style.display = 'block';
+            }
+
+            function hideSuggestions() {
+                suggestionsContainer.style.display = 'none';
+                currentSuggestions = [];
+            }
+
+            // Handle keyboard navigation
+            addressInput.addEventListener('keydown', (e) => {
+                const suggestions = suggestionsContainer.querySelectorAll('.address-suggestion');
+                const activeSuggestion = suggestionsContainer.querySelector('.address-suggestion.active');
+                
+                if (e.key === 'ArrowDown') {
+                    e.preventDefault();
+                    if (activeSuggestion) {
+                        activeSuggestion.classList.remove('active');
+                        const next = activeSuggestion.nextElementSibling;
+                        if (next) {
+                            next.classList.add('active');
+                        } else {
+                            suggestions[0]?.classList.add('active');
+                        }
+                    } else {
+                        suggestions[0]?.classList.add('active');
+                    }
+                } else if (e.key === 'ArrowUp') {
+                    e.preventDefault();
+                    if (activeSuggestion) {
+                        activeSuggestion.classList.remove('active');
+                        const prev = activeSuggestion.previousElementSibling;
+                        if (prev) {
+                            prev.classList.add('active');
+                        } else {
+                            suggestions[suggestions.length - 1]?.classList.add('active');
+                        }
+                    } else {
+                        suggestions[suggestions.length - 1]?.classList.add('active');
+                    }
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    if (activeSuggestion) {
+                        addressInput.value = activeSuggestion.textContent;
+                        hideSuggestions();
+                    }
+                } else if (e.key === 'Escape') {
+                    hideSuggestions();
+                }
+            });
+        }
     </script>
+
+    <!-- Login Modal -->
+    <div class="modal fade" id="login-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Log In</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="login-form">
+                        <div class="mb-3">
+                            <label for="login-email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="login-email" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="login-password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="login-password" name="password" required>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Log In</button>
+                        </div>
+                    </form>
+                    <div class="text-center mt-3">
+                        <p class="mb-0">Don't have an account? <a href="#" onclick="showRegisterModal()">Sign up</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div class="modal fade" id="register-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Sign Up</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="register-form">
+                        <div class="mb-3">
+                            <label for="register-name" class="form-label">Full Name *</label>
+                            <input type="text" class="form-control" id="register-name" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="register-email" class="form-label">Email *</label>
+                            <input type="email" class="form-control" id="register-email" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="register-phone" class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="register-phone" name="phone">
+                        </div>
+                        <div class="mb-3">
+                            <label for="register-password" class="form-label">Password *</label>
+                            <input type="password" class="form-control" id="register-password" name="password" required minlength="6">
+                            <div class="form-text">Password must be at least 6 characters long.</div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Sign Up</button>
+                        </div>
+                    </form>
+                    <div class="text-center mt-3">
+                        <p class="mb-0">Already have an account? <a href="#" onclick="showLoginModal()">Log in</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="data.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
 
