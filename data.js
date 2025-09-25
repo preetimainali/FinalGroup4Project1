@@ -275,7 +275,15 @@ class DataManager {
                 phone: "555-0101",
                 password: "password123", // In real app, this would be hashed
                 createdAt: new Date().toISOString(),
-                isVerified: true
+                isVerified: true,
+                profilePicture: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=150&h=150&fit=crop&crop=face",
+                bio: "Love helping with pets and small tasks around campus! Available most weekends.",
+                skills: ["pet care", "moving", "cleaning"],
+                rating: 4.8,
+                totalRatings: 12,
+                college: "University of Alabama - Tuscaloosa",
+                year: "Junior",
+                major: "Biology"
             },
             {
                 id: 2,
@@ -284,7 +292,15 @@ class DataManager {
                 phone: "555-0102",
                 password: "password123",
                 createdAt: new Date().toISOString(),
-                isVerified: true
+                isVerified: true,
+                profilePicture: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+                bio: "Engineering student who loves assembling furniture and fixing things. Handy with tools!",
+                skills: ["assembly", "tech support", "moving"],
+                rating: 4.9,
+                totalRatings: 8,
+                college: "University of Alabama - Tuscaloosa",
+                year: "Senior",
+                major: "Mechanical Engineering"
             },
             {
                 id: 3,
@@ -369,7 +385,15 @@ class DataManager {
             }
         ];
 
+        // Initialize new data structures
+        const sampleRatings = [];
+        const sampleMessages = [];
+        const sampleNotifications = [];
+
         localStorage.setItem('getitdone_users', JSON.stringify(sampleUsers));
+        localStorage.setItem('getitdone_ratings', JSON.stringify(sampleRatings));
+        localStorage.setItem('getitdone_messages', JSON.stringify(sampleMessages));
+        localStorage.setItem('getitdone_notifications', JSON.stringify(sampleNotifications));
     }
 
     // Task Management
@@ -760,6 +784,30 @@ class DataManager {
             );
         }
 
+        // Category filter
+        if (filters.category) {
+            tasks = tasks.filter(task => {
+                // Map categories to task tags/types
+                const categoryMapping = {
+                    'academic': ['tutoring', 'academic', 'homework', 'essay', 'research', 'study'],
+                    'household': ['cleaning', 'household', 'laundry', 'organizing', 'maintenance'],
+                    'tech': ['tech', 'computer', 'software', 'website', 'programming', 'technical'],
+                    'creative': ['creative', 'design', 'art', 'photography', 'video', 'writing'],
+                    'delivery': ['delivery', 'pickup', 'shopping', 'errands', 'transport'],
+                    'other': ['other', 'miscellaneous', 'general']
+                };
+                
+                const categoryTags = categoryMapping[filters.category] || [];
+                return categoryTags.some(tag => 
+                    task.tags.some(taskTag => 
+                        taskTag.toLowerCase().includes(tag.toLowerCase())
+                    ) || 
+                    task.title.toLowerCase().includes(filters.category.toLowerCase()) ||
+                    task.description.toLowerCase().includes(filters.category.toLowerCase())
+                );
+            });
+        }
+
         // Time filter
         if (filters.timeFilter) {
             const today = new Date();
@@ -803,9 +851,330 @@ class DataManager {
                 return sortedTasks.sort((a, b) => (a.college || '').localeCompare(b.college || ''));
             case 'jobType':
                 return sortedTasks.sort((a, b) => (a.jobType || '').localeCompare(b.jobType || ''));
+            case 'rating':
+                return sortedTasks.sort((a, b) => {
+                    const posterA = this.getUserByEmail(a.posterEmail);
+                    const posterB = this.getUserByEmail(b.posterEmail);
+                    return (posterB?.rating || 0) - (posterA?.rating || 0);
+                });
             default:
                 return sortedTasks;
         }
+    }
+
+    // Rating Management
+    getAllRatings() {
+        const ratings = localStorage.getItem('getitdone_ratings');
+        return ratings ? JSON.parse(ratings) : [];
+    }
+
+    getRatingsByUserId(userId) {
+        const ratings = this.getAllRatings();
+        return ratings.filter(rating => rating.ratedUserId === parseInt(userId));
+    }
+
+    addRating(ratingData) {
+        const ratings = this.getAllRatings();
+        const newRating = {
+            id: this.getNextId(ratings),
+            ...ratingData,
+            createdAt: new Date().toISOString()
+        };
+        ratings.push(newRating);
+        localStorage.setItem('getitdone_ratings', JSON.stringify(ratings));
+        
+        // Update user's average rating
+        this.updateUserRating(ratingData.ratedUserId);
+        
+        return newRating;
+    }
+
+    updateUserRating(userId) {
+        const ratings = this.getRatingsByUserId(userId);
+        if (ratings.length === 0) return;
+        
+        const averageRating = ratings.reduce((sum, rating) => sum + rating.rating, 0) / ratings.length;
+        const user = this.getUserById(userId);
+        if (user) {
+            user.rating = Math.round(averageRating * 10) / 10;
+            user.totalRatings = ratings.length;
+            this.updateUser(userId, user);
+        }
+    }
+
+    // Message Management
+    getAllMessages() {
+        const messages = localStorage.getItem('getitdone_messages');
+        return messages ? JSON.parse(messages) : [];
+    }
+
+    getMessagesBetweenUsers(user1Email, user2Email) {
+        const messages = this.getAllMessages();
+        return messages.filter(msg => 
+            (msg.senderEmail === user1Email && msg.receiverEmail === user2Email) ||
+            (msg.senderEmail === user2Email && msg.receiverEmail === user1Email)
+        ).sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+    }
+
+    getConversationsForUser(userEmail) {
+        const messages = this.getAllMessages();
+        const conversations = {};
+        
+        messages.forEach(msg => {
+            const otherUser = msg.senderEmail === userEmail ? msg.receiverEmail : msg.senderEmail;
+            if (!conversations[otherUser]) {
+                conversations[otherUser] = {
+                    otherUserEmail: otherUser,
+                    lastMessage: msg,
+                    unreadCount: 0
+                };
+            }
+            
+            if (msg.receiverEmail === userEmail && !msg.read) {
+                conversations[otherUser].unreadCount++;
+            }
+            
+            if (new Date(msg.createdAt) > new Date(conversations[otherUser].lastMessage.createdAt)) {
+                conversations[otherUser].lastMessage = msg;
+            }
+        });
+        
+        return Object.values(conversations).sort((a, b) => 
+            new Date(b.lastMessage.createdAt) - new Date(a.lastMessage.createdAt)
+        );
+    }
+
+    addMessage(messageData) {
+        const messages = this.getAllMessages();
+        const newMessage = {
+            id: this.getNextId(messages),
+            ...messageData,
+            read: false,
+            createdAt: new Date().toISOString()
+        };
+        messages.push(newMessage);
+        localStorage.setItem('getitdone_messages', JSON.stringify(messages));
+        
+        // Create notification for receiver
+        this.addNotification({
+            userId: this.getUserByEmail(messageData.receiverEmail)?.id,
+            type: 'message',
+            title: 'New Message',
+            message: `${messageData.senderName} sent you a message`,
+            data: { conversationPartner: messageData.senderEmail }
+        });
+        
+        return newMessage;
+    }
+
+    markMessagesAsRead(senderEmail, receiverEmail) {
+        const messages = this.getAllMessages();
+        const updatedMessages = messages.map(msg => {
+            if (msg.senderEmail === senderEmail && msg.receiverEmail === receiverEmail && !msg.read) {
+                return { ...msg, read: true };
+            }
+            return msg;
+        });
+        localStorage.setItem('getitdone_messages', JSON.stringify(updatedMessages));
+    }
+
+    // Notification Management
+    getAllNotifications() {
+        const notifications = localStorage.getItem('getitdone_notifications');
+        return notifications ? JSON.parse(notifications) : [];
+    }
+
+    getNotificationsForUser(userId) {
+        const notifications = this.getAllNotifications();
+        return notifications.filter(notif => notif.userId === parseInt(userId))
+            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    }
+
+    addNotification(notificationData) {
+        const notifications = this.getAllNotifications();
+        const newNotification = {
+            id: this.getNextId(notifications),
+            ...notificationData,
+            read: false,
+            createdAt: new Date().toISOString()
+        };
+        notifications.push(newNotification);
+        localStorage.setItem('getitdone_notifications', JSON.stringify(notifications));
+        return newNotification;
+    }
+
+    markNotificationAsRead(notificationId) {
+        const notifications = this.getAllNotifications();
+        const updatedNotifications = notifications.map(notif => {
+            if (notif.id === parseInt(notificationId)) {
+                return { ...notif, read: true };
+            }
+            return notif;
+        });
+        localStorage.setItem('getitdone_notifications', JSON.stringify(updatedNotifications));
+    }
+
+    markAllNotificationsAsRead(userId) {
+        const notifications = this.getAllNotifications();
+        const updatedNotifications = notifications.map(notif => {
+            if (notif.userId === parseInt(userId) && !notif.read) {
+                return { ...notif, read: true };
+            }
+            return notif;
+        });
+        localStorage.setItem('getitdone_notifications', JSON.stringify(updatedNotifications));
+    }
+
+    getUnreadNotificationCount(userId) {
+        const notifications = this.getNotificationsForUser(userId);
+        return notifications.filter(notif => !notif.read).length;
+    }
+
+    // Enhanced Search with Fuzzy Matching
+    searchTasks(query, filters = {}) {
+        let tasks = this.getAllTasks();
+
+        // Enhanced text search with fuzzy matching
+        if (query) {
+            const searchTerm = query.toLowerCase().trim();
+            tasks = tasks.filter(task => {
+                const titleMatch = this.fuzzyMatch(task.title.toLowerCase(), searchTerm);
+                const descMatch = this.fuzzyMatch(task.description.toLowerCase(), searchTerm);
+                const tagMatch = task.tags.some(tag => this.fuzzyMatch(tag.toLowerCase(), searchTerm));
+                const posterMatch = this.fuzzyMatch(task.posterName.toLowerCase(), searchTerm);
+                
+                return titleMatch || descMatch || tagMatch || posterMatch;
+            });
+        }
+
+        // Apply filters (existing logic)
+        if (filters.tags && filters.tags.length > 0) {
+            tasks = tasks.filter(task => 
+                filters.tags.some(filterTag => task.tags.includes(filterTag))
+            );
+        }
+
+        if (filters.status && filters.status.length > 0) {
+            tasks = tasks.filter(task => filters.status.includes(task.status));
+        }
+
+        if (filters.jobType && filters.jobType.length > 0) {
+            tasks = tasks.filter(task => filters.jobType.includes(task.jobType));
+        }
+
+        if (filters.college && filters.college.length > 0) {
+            tasks = tasks.filter(task => filters.college.includes(task.college));
+        }
+
+        if (filters.location) {
+            tasks = tasks.filter(task => 
+                task.locationName.toLowerCase().includes(filters.location.toLowerCase()) ||
+                task.locationType.toLowerCase().includes(filters.location.toLowerCase()) ||
+                (task.college && task.college.toLowerCase().includes(filters.location.toLowerCase()))
+            );
+        }
+
+        if (filters.timeFilter) {
+            const today = new Date();
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const weekend = new Date(today);
+            weekend.setDate(weekend.getDate() + (6 - today.getDay()));
+
+            tasks = tasks.filter(task => {
+                const taskDate = new Date(task.date);
+                switch (filters.timeFilter) {
+                    case 'today':
+                        return taskDate.toDateString() === today.toDateString();
+                    case 'tomorrow':
+                        return taskDate.toDateString() === tomorrow.toDateString();
+                    case 'weekend':
+                        return taskDate >= weekend;
+                    default:
+                        return true;
+                }
+            });
+        }
+
+        // New filters
+        if (filters.minRating) {
+            tasks = tasks.filter(task => {
+                const poster = this.getUserByEmail(task.posterEmail);
+                return poster && poster.rating >= filters.minRating;
+            });
+        }
+
+        if (filters.maxDistance && filters.userLocation) {
+            tasks = tasks.filter(task => {
+                if (task.jobType === 'remote') return true;
+                if (!task.coordinates) return false;
+                
+                const distance = this.calculateDistance(
+                    filters.userLocation.lat,
+                    filters.userLocation.lng,
+                    task.coordinates.lat,
+                    task.coordinates.lng
+                );
+                return distance <= filters.maxDistance;
+            });
+        }
+
+        if (filters.priceRange) {
+            tasks = tasks.filter(task => {
+                return task.payAmount >= filters.priceRange.min && 
+                       task.payAmount <= filters.priceRange.max;
+            });
+        }
+
+        return tasks;
+    }
+
+    // Fuzzy matching algorithm
+    fuzzyMatch(text, pattern) {
+        if (!pattern) return true;
+        
+        // Exact match
+        if (text.includes(pattern)) return true;
+        
+        // Fuzzy match - allow for small differences
+        let patternIndex = 0;
+        for (let i = 0; i < text.length && patternIndex < pattern.length; i++) {
+            if (text[i] === pattern[patternIndex]) {
+                patternIndex++;
+            }
+        }
+        
+        return patternIndex === pattern.length;
+    }
+
+    // Task Completion Management
+    markTaskAsCompleted(taskId, completionData) {
+        const task = this.getTaskById(taskId);
+        if (!task) return null;
+        
+        const updates = {
+            status: 'completed',
+            completedAt: new Date().toISOString(),
+            completionNotes: completionData.notes,
+            completionPhotos: completionData.photos || [],
+            paymentConfirmed: completionData.paymentConfirmed || false
+        };
+        
+        const updatedTask = this.updateTask(taskId, updates);
+        
+        // Create notification for poster
+        const poster = this.getUserByEmail(task.posterEmail);
+        if (poster) {
+            this.addNotification({
+                userId: poster.id,
+                type: 'task_completed',
+                title: 'Task Completed',
+                message: `Your task "${task.title}" has been marked as completed`,
+                data: { taskId: taskId }
+            });
+        }
+        
+        return updatedTask;
     }
 }
 

@@ -31,6 +31,10 @@ class GetItDoneApp {
 
         // Initialize common functionality
         this.initCommonFeatures();
+        
+        // Initialize new features
+        this.initNotificationSystem();
+        this.initMessagingSystem();
     }
 
     getCurrentPage() {
@@ -72,29 +76,27 @@ class GetItDoneApp {
     }
 
     updateNavigation() {
-        const loginLink = document.querySelector('a[onclick="showLoginModal()"]');
-        const userMenu = document.getElementById('user-menu');
+        const guestActions = document.getElementById('guest-actions');
+        const userActions = document.getElementById('user-actions');
+        const profileInitial = document.getElementById('profile-initial');
+        const dropdownInitial = document.getElementById('dropdown-initial');
+        const dropdownName = document.getElementById('dropdown-name');
+        const dropdownEmail = document.getElementById('dropdown-email');
         
         if (this.currentUser && this.currentUserData) {
-            // Show user menu
-            if (loginLink) {
-                loginLink.style.display = 'none';
-            }
-            if (userMenu) {
-                userMenu.style.display = 'block';
-                const userName = userMenu.querySelector('.user-name');
-                if (userName) {
-                    userName.textContent = this.currentUserData.name;
-                }
-            }
+            // Show user actions
+            if (guestActions) guestActions.style.display = 'none';
+            if (userActions) userActions.style.display = 'flex';
+            
+            // Update user info
+            if (profileInitial) profileInitial.textContent = this.currentUserData.name.charAt(0).toUpperCase();
+            if (dropdownInitial) dropdownInitial.textContent = this.currentUserData.name.charAt(0).toUpperCase();
+            if (dropdownName) dropdownName.textContent = this.currentUserData.name;
+            if (dropdownEmail) dropdownEmail.textContent = this.currentUserData.email;
         } else {
-            // Show login link
-            if (loginLink) {
-                loginLink.style.display = 'block';
-            }
-            if (userMenu) {
-                userMenu.style.display = 'none';
-            }
+            // Show guest actions
+            if (guestActions) guestActions.style.display = 'flex';
+            if (userActions) userActions.style.display = 'none';
         }
     }
 
@@ -146,6 +148,7 @@ class GetItDoneApp {
         this.loadAllTasks();
         this.setupFilters();
         this.setupSearch();
+        this.applyUrlFilters();
     }
 
     loadAllTasks(filters = {}) {
@@ -336,12 +339,75 @@ class GetItDoneApp {
         });
     }
 
+    applyUrlFilters() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const category = urlParams.get('category');
+        const search = urlParams.get('search');
+        
+        if (category) {
+            // Filter tasks by category
+            this.currentFilters = { ...this.currentFilters, category: category };
+            this.loadAllTasks(this.currentFilters);
+            
+            // Map categories to their corresponding tags and check them
+            const categoryMapping = {
+                'academic': ['tutoring', 'academic', 'homework', 'essay', 'research', 'study'],
+                'household': ['cleaning', 'household', 'laundry', 'organizing', 'maintenance'],
+                'tech': ['tech', 'computer', 'software', 'website', 'programming', 'technical'],
+                'creative': ['creative', 'design', 'art', 'photography', 'video', 'writing'],
+                'delivery': ['delivery', 'pickup', 'shopping', 'errands', 'transport'],
+                'other': ['other', 'miscellaneous', 'general']
+            };
+            
+            const categoryTags = categoryMapping[category] || [];
+            
+            // Check the corresponding tag checkboxes
+            categoryTags.forEach(tag => {
+                const checkbox = document.getElementById(`tag-${tag}`);
+                if (checkbox) {
+                    checkbox.checked = true;
+                }
+            });
+            
+            // Update filters to include the checked tags
+            this.currentFilters = { ...this.currentFilters, tags: categoryTags };
+            this.loadAllTasks(this.currentFilters);
+        }
+        
+        if (search) {
+            // Set search input
+            const searchInputs = document.querySelectorAll('#search-input, #search-input-mobile');
+            searchInputs.forEach(input => {
+                if (input) input.value = search;
+            });
+            
+            // Apply search filter
+            this.currentFilters = { ...this.currentFilters, search: search };
+            this.loadAllTasks(this.currentFilters);
+        }
+    }
+
     getActiveFilters() {
         const form = document.getElementById('filter-form');
         if (!form) return {};
 
         const formData = new FormData(form);
         const filters = {};
+
+        // Get category filter from URL or hidden input
+        const urlParams = new URLSearchParams(window.location.search);
+        const categoryFromUrl = urlParams.get('category');
+        const categoryFromForm = formData.get('category');
+        const category = categoryFromUrl || categoryFromForm;
+        if (category) {
+            filters.category = category;
+        }
+
+        // Get search term
+        const searchInput = document.getElementById('search-input');
+        if (searchInput && searchInput.value.trim()) {
+            filters.search = searchInput.value.trim();
+        }
 
         // Get selected tags
         const tags = formData.getAll('tags');
@@ -410,6 +476,9 @@ class GetItDoneApp {
         // Update page title
         document.title = `${task.title} - GetItDone`;
 
+        // Get poster info
+        const poster = dataManager.getUserByEmail(task.posterEmail);
+
         // Populate task information
         const elements = {
             'task-title': task.title,
@@ -430,6 +499,64 @@ class GetItDoneApp {
             }
         });
 
+        // Populate poster info with rating
+        const posterInfoContainer = document.getElementById('poster-info');
+        if (posterInfoContainer) {
+            posterInfoContainer.innerHTML = `
+                <div class="poster-card">
+                    <div class="poster-avatar">
+                        <img src="${poster?.profilePicture || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjUiIGN5PSIyNSIgcj0iMjUiIGZpbGw9IiNGMUY1RjkiLz4KPHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4PSIxMyIgeT0iMTMiPgo8Y2lyY2xlIGN4PSIxMiIgY3k9IjkiIHI9IjMiIGZpbGw9IiM2QjcyODAiLz4KPHBhdGggZD0iTTYgMTkuNWMwLTMuMzEgMi42OS02IDYtNnM2IDIuNjkgNiA2djQuNUg2di00LjV6IiBmaWxsPSIjNkI3MjgwIi8+Cjwvc3ZnPgo8L3N2Zz4K'}" 
+                             alt="${task.posterName}" class="rounded-circle">
+                    </div>
+                    <div class="poster-info">
+                        <h6 class="poster-name">${task.posterName}</h6>
+                        ${poster?.rating > 0 ? `
+                            <div class="poster-rating">
+                                <div class="stars">
+                                    ${Array.from({length: 5}, (_, i) => 
+                                        `<i class="bi bi-star${i < Math.floor(poster.rating) ? '-fill' : ''}"></i>`
+                                    ).join('')}
+                                </div>
+                                <span class="rating-text">${poster.rating} (${poster.totalRatings} reviews)</span>
+                            </div>
+                        ` : '<div class="no-rating">No ratings yet</div>'}
+                    </div>
+                    <div class="poster-actions">
+                        <button class="btn btn-outline-primary btn-sm profile-action-btn" onclick="showUserProfile('${task.posterEmail}')" title="View Profile">
+                            <i class="bi bi-person me-1"></i>Profile
+                        </button>
+                        ${this.currentUser && this.currentUser !== task.posterEmail ? `
+                            <button class="btn btn-outline-secondary btn-sm message-action-btn" onclick="startConversation('${task.posterEmail}')" title="Message">
+                                <i class="bi bi-chat-dots me-1"></i>Message
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Populate contact section
+        const contactContainer = document.getElementById('task-contact');
+        if (contactContainer) {
+            if (this.currentUser && this.currentUser !== task.posterEmail) {
+                contactContainer.innerHTML = `
+                    <button class="btn btn-primary btn-sm" onclick="startConversation('${task.posterEmail}')">
+                        <i class="bi bi-chat-dots me-1"></i>Message Poster
+                    </button>
+                `;
+            } else if (this.currentUser === task.posterEmail) {
+                contactContainer.innerHTML = `
+                    <span class="text-muted">This is your task</span>
+                `;
+            } else {
+                contactContainer.innerHTML = `
+                    <a href="#" class="btn btn-outline-primary btn-sm" onclick="showLoginModal()">
+                        <i class="bi bi-box-arrow-in-right me-1"></i>Login to Message
+                    </a>
+                `;
+            }
+        }
+
         // Populate tags
         const tagsContainer = document.getElementById('task-tags');
         if (tagsContainer) {
@@ -442,13 +569,28 @@ class GetItDoneApp {
             });
         }
 
-        // Show/hide apply button based on status
+        // Show/hide apply button based on status and user
         const applyButton = document.getElementById('apply-button');
+        const completionButton = document.getElementById('completion-button');
+        
         if (applyButton) {
-            if (task.status === 'open') {
+            if (task.status === 'open' && this.currentUser !== task.posterEmail) {
                 applyButton.style.display = 'block';
             } else {
                 applyButton.style.display = 'none';
+            }
+        }
+
+        // Show completion button for assigned tasks where user is the helper
+        if (completionButton) {
+            const applications = dataManager.getApplicationsByTaskId(task.id);
+            const userApplication = applications.find(app => app.helperEmail === this.currentUser && app.status === 'accepted');
+            
+            if (userApplication && task.status === 'assigned') {
+                completionButton.style.display = 'block';
+                completionButton.onclick = () => this.showTaskCompletionModal(task.id);
+            } else {
+                completionButton.style.display = 'none';
             }
         }
     }
@@ -957,6 +1099,47 @@ class GetItDoneApp {
         this.showToast(message, 'success');
     }
 
+    // Show notifications modal
+    showNotifications() {
+        const modal = new bootstrap.Modal(document.getElementById('notifications-modal'));
+        this.loadNotifications();
+        modal.show();
+    }
+
+    // Open messages modal
+    openMessagesModal() {
+        const modal = new bootstrap.Modal(document.getElementById('messages-modal'));
+        this.loadConversations();
+        modal.show();
+    }
+
+    // Perform search from header
+    performSearch() {
+        const searchInput = document.getElementById('header-search-input');
+        const searchTerm = searchInput.value.trim();
+        
+        if (searchTerm) {
+            // Redirect to browse page with search term
+            window.location.href = `browse.html?search=${encodeURIComponent(searchTerm)}`;
+        }
+    }
+
+    // Toggle profile dropdown
+    toggleProfileDropdown() {
+        const dropdown = document.getElementById('profile-dropdown');
+        if (dropdown) {
+            dropdown.classList.toggle('show');
+        }
+    }
+
+    // Close profile dropdown when clicking outside
+    closeProfileDropdown() {
+        const dropdown = document.getElementById('profile-dropdown');
+        if (dropdown) {
+            dropdown.classList.remove('show');
+        }
+    }
+
     showError(message) {
         this.showToast(message, 'error');
     }
@@ -1097,6 +1280,527 @@ class GetItDoneApp {
             this.handleApply(form);
         });
     }
+
+    // Enhanced Task Card with Ratings and Messaging
+    createTaskCard(task) {
+        const col = document.createElement('div');
+        col.className = 'col-md-6 col-lg-4 mb-4';
+
+        const statusClass = `status-${task.status}`;
+        const statusText = task.status.charAt(0).toUpperCase() + task.status.slice(1).replace('_', ' ');
+
+        // Get poster info
+        const poster = dataManager.getUserByEmail(task.posterEmail);
+        const posterRating = poster?.rating || 0;
+        const posterRatingCount = poster?.totalRatings || 0;
+
+        // Generate random pastel class for variety
+        const pastelClasses = ['card-pastel-blue', 'card-pastel-green', 'card-pastel-purple', 'card-pastel-pink', 'card-pastel-yellow', 'card-pastel-orange'];
+        const randomPastelClass = pastelClasses[Math.floor(Math.random() * pastelClasses.length)];
+
+        col.innerHTML = `
+            <div class="card task-card h-100 ${randomPastelClass}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h5 class="card-title task-title">${task.title}</h5>
+                        <span class="status-badge ${statusClass}">${statusText}</span>
+                    </div>
+                    <p class="card-text text-muted mb-3">${task.description.substring(0, 100)}${task.description.length > 100 ? '...' : ''}</p>
+                    
+                    <!-- Poster Info with Rating -->
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="user-avatar-small me-2">
+                            <img src="${poster?.profilePicture || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iMTIiIGZpbGw9IiNGMUY1RjkiLz4KPHN2ZyB3aWR0aD0iMTIiIGhlaWdodD0iMTIiIHZpZXdCb3g9IjAgMCAxMiAxMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4PSI2IiB5PSI2Ij4KPGNpcmNsZSBjeD0iNiIgY3k9IjQuNSIgcj0iMS41IiBmaWxsPSIjNkI3MjgwIi8+CjxwYXRoIGQ9Ik0zIDkuNzVjMC0xLjY1IDEuMzUtMyAzLTNoNmMxLjY1IDAgMyAxLjM1IDMgM3YyLjI1SDN2LTIuMjV6IiBmaWxsPSIjNkI3MjgwIi8+Cjwvc3ZnPgo8L3N2Zz4K'}" 
+                                 alt="${task.posterName}" class="rounded-circle profile-avatar" style="width: 24px; height: 24px; object-fit: cover;">
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-center">
+                                <span class="fw-medium me-2" style="cursor: pointer; color: #60a5fa;" onclick="showUserProfile('${task.posterEmail}')" title="View Profile">${task.posterName}</span>
+                                ${posterRating > 0 ? `
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-star-fill text-warning me-1" style="font-size: 0.8em;"></i>
+                                        <small class="text-muted">${posterRating} (${posterRatingCount})</small>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary profile-btn" onclick="showUserProfile('${task.posterEmail}')" title="View Profile">
+                            <i class="bi bi-person"></i>
+                        </button>
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="task-pay">$${task.payAmount}</span>
+                        <small class="task-location">
+                            <i class="bi ${task.jobType === 'remote' ? 'bi-laptop' : 'bi-geo-alt'} me-1"></i>
+                            ${task.jobType === 'remote' ? 'Remote' : (task.college ? task.college.split(' - ')[0] : task.locationName)}
+                        </small>
+                    </div>
+                    <div class="mb-3">
+                        ${task.tags.map(tag => `<span class="tag-badge">#${tag}</span>`).join('')}
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="task-time">
+                            <i class="bi bi-clock me-1"></i>${this.formatDate(task.date)}
+                        </small>
+                        <div class="btn-group">
+                            <a href="task-detail.html?id=${task.id}" class="btn btn-primary btn-sm">View Details</a>
+                            ${this.currentUser && this.currentUser !== task.posterEmail ? `
+                                <button class="btn btn-outline-secondary btn-sm message-btn" onclick="startConversation('${task.posterEmail}')" title="Message">
+                                    <i class="bi bi-chat-dots"></i>
+                                </button>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        return col;
+    }
+
+    // Notification System
+    initNotificationSystem() {
+        this.loadNotifications();
+        // Refresh notifications every 30 seconds
+        setInterval(() => {
+            this.loadNotifications();
+        }, 30000);
+    }
+
+    loadNotifications() {
+        if (!this.currentUserData) return;
+
+        const notifications = dataManager.getNotificationsForUser(this.currentUserData.id);
+        const unreadCount = dataManager.getUnreadNotificationCount(this.currentUserData.id);
+
+        // Update notification badge
+        const badge = document.getElementById('notification-badge');
+        if (badge) {
+            if (unreadCount > 0) {
+                badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                badge.style.display = 'block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        // Update notifications list
+        const notificationsList = document.getElementById('notifications-list');
+        if (notificationsList) {
+            notificationsList.innerHTML = '';
+            
+            if (notifications.length === 0) {
+                notificationsList.innerHTML = '<li class="dropdown-item-text text-center text-muted py-3">No notifications</li>';
+                return;
+            }
+
+            notifications.slice(0, 5).forEach(notification => {
+                const notificationElement = document.createElement('li');
+                notificationElement.className = `dropdown-item ${!notification.read ? 'bg-light' : ''}`;
+                notificationElement.innerHTML = `
+                    <div class="d-flex align-items-start">
+                        <div class="flex-grow-1">
+                            <div class="fw-medium">${notification.title}</div>
+                            <div class="text-muted small">${notification.message}</div>
+                            <div class="text-muted small">${this.formatDate(notification.createdAt)}</div>
+                        </div>
+                        ${!notification.read ? '<div class="badge bg-primary rounded-pill ms-2" style="width: 8px; height: 8px;"></div>' : ''}
+                    </div>
+                `;
+                notificationElement.addEventListener('click', () => {
+                    this.handleNotificationClick(notification);
+                });
+                notificationsList.appendChild(notificationElement);
+            });
+        }
+    }
+
+    handleNotificationClick(notification) {
+        dataManager.markNotificationAsRead(notification.id);
+        this.loadNotifications();
+
+        // Handle different notification types
+        switch (notification.type) {
+            case 'message':
+                if (notification.data?.conversationPartner) {
+                    showMessagesModal();
+                    setTimeout(() => {
+                        this.selectConversation(notification.data.conversationPartner);
+                    }, 100);
+                }
+                break;
+            case 'task_completed':
+                if (notification.data?.taskId) {
+                    window.location.href = `task-detail.html?id=${notification.data.taskId}`;
+                }
+                break;
+        }
+    }
+
+    // Messaging System
+    initMessagingSystem() {
+        this.loadConversations();
+        this.setupMessageForm();
+    }
+
+    loadConversations() {
+        if (!this.currentUser) return;
+
+        const conversations = dataManager.getConversationsForUser(this.currentUser);
+        const totalUnread = conversations.reduce((sum, conv) => sum + conv.unreadCount, 0);
+
+        // Update message badge
+        const badge = document.getElementById('message-badge');
+        if (badge) {
+            if (totalUnread > 0) {
+                badge.textContent = totalUnread > 99 ? '99+' : totalUnread;
+                badge.style.display = 'block';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        // Update conversations list
+        const conversationsList = document.getElementById('conversations-list');
+        const conversationsListFull = document.getElementById('conversations-list-full');
+        
+        [conversationsList, conversationsListFull].forEach(list => {
+            if (!list) return;
+            
+            list.innerHTML = '';
+            
+            if (conversations.length === 0) {
+                list.innerHTML = '<div class="text-center text-muted py-3">No messages</div>';
+                return;
+            }
+
+            conversations.slice(0, list === conversationsList ? 3 : 10).forEach(conversation => {
+                const otherUser = dataManager.getUserByEmail(conversation.otherUserEmail);
+                const conversationElement = document.createElement('div');
+                conversationElement.className = `dropdown-item ${list === conversationsListFull ? 'border-bottom' : ''} ${conversation.unreadCount > 0 ? 'bg-light' : ''}`;
+                conversationElement.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <img src="${otherUser?.profilePicture || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiNGMUY1RjkiLz4KPHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4PSI4IiB5PSI4Ij4KPGNpcmNsZSBjeD0iOCIgY3k9IjYiIHI9IjIiIGZpbGw9IiM2QjcyODAiLz4KPHBhdGggZD0iTTQgMTNjMC0yLjIxIDEuNzktNCA0LTRzNCAxLjc5IDQgNHYxSDh2LTF6IiBmaWxsPSIjNkI3MjgwIi8+Cjwvc3ZnPgo8L3N2Zz4K'}" 
+                             alt="${otherUser?.name || 'User'}" class="rounded-circle me-2 conversation-avatar">
+                        <div class="flex-grow-1">
+                            <div class="fw-medium conversation-name">${otherUser?.name || 'User'}</div>
+                            <div class="text-muted small conversation-preview">${conversation.lastMessage.content.substring(0, 50)}${conversation.lastMessage.content.length > 50 ? '...' : ''}</div>
+                            <div class="text-muted small conversation-time">${this.formatDate(conversation.lastMessage.createdAt)}</div>
+                        </div>
+                        ${conversation.unreadCount > 0 ? `<span class="badge bg-primary rounded-pill unread-badge">${conversation.unreadCount}</span>` : ''}
+                    </div>
+                `;
+                conversationElement.addEventListener('click', () => {
+                    if (list === conversationsListFull) {
+                        this.selectConversation(conversation.otherUserEmail);
+                    } else {
+                        showMessagesModal();
+                        setTimeout(() => {
+                            this.selectConversation(conversation.otherUserEmail);
+                        }, 100);
+                    }
+                });
+                list.appendChild(conversationElement);
+            });
+        });
+    }
+
+    setupMessageForm() {
+        const messageForm = document.getElementById('message-form');
+        if (!messageForm) return;
+
+        messageForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.sendMessage();
+        });
+    }
+
+    selectConversation(otherUserEmail) {
+        this.currentConversation = otherUserEmail;
+        this.loadMessages(otherUserEmail);
+        
+        // Show message compose area
+        const messageCompose = document.getElementById('message-compose');
+        if (messageCompose) {
+            messageCompose.style.display = 'block';
+        }
+
+        // Mark messages as read
+        dataManager.markMessagesAsRead(otherUserEmail, this.currentUser);
+        this.loadConversations();
+    }
+
+    startConversation(userEmail) {
+        if (!this.currentUser) {
+            this.showError('Please log in to send messages');
+            // Show login modal
+            const loginModal = new bootstrap.Modal(document.getElementById('login-modal'));
+            loginModal.show();
+            return;
+        }
+        
+        this.openMessagesModal();
+        setTimeout(() => {
+            this.selectConversation(userEmail);
+        }, 100);
+    }
+
+    loadMessages(otherUserEmail) {
+        const messages = dataManager.getMessagesBetweenUsers(this.currentUser, otherUserEmail);
+        const messagesArea = document.getElementById('messages-area');
+        
+        if (!messagesArea) return;
+
+        messagesArea.innerHTML = '';
+        
+        if (messages.length === 0) {
+            messagesArea.innerHTML = '<div class="text-center text-muted py-3">No messages yet. Start the conversation!</div>';
+            return;
+        }
+
+        messages.forEach(message => {
+            const isOwnMessage = message.senderEmail === this.currentUser;
+            const messageElement = document.createElement('div');
+            messageElement.className = `d-flex ${isOwnMessage ? 'justify-content-end' : 'justify-content-start'} mb-3`;
+            
+            messageElement.innerHTML = `
+                <div class="message-bubble ${isOwnMessage ? 'bg-primary text-white' : 'bg-light'} rounded p-3" style="max-width: 70%;">
+                    <div class="message-content">${message.content}</div>
+                    <div class="message-time small ${isOwnMessage ? 'text-white-50' : 'text-muted'} mt-1">
+                        ${this.formatTime(message.createdAt)}
+                    </div>
+                </div>
+            `;
+            
+            messagesArea.appendChild(messageElement);
+        });
+
+        // Scroll to bottom
+        messagesArea.scrollTop = messagesArea.scrollHeight;
+    }
+
+    sendMessage() {
+        const messageInput = document.getElementById('message-input');
+        if (!messageInput || !this.currentConversation) return;
+
+        const content = messageInput.value.trim();
+        if (!content) return;
+
+        const messageData = {
+            senderEmail: this.currentUser,
+            senderName: this.currentUserData.name,
+            receiverEmail: this.currentConversation,
+            content: content
+        };
+
+        dataManager.addMessage(messageData);
+        
+        // Clear input and reload messages
+        messageInput.value = '';
+        this.loadMessages(this.currentConversation);
+        this.loadConversations();
+    }
+
+    // Location Services (Disabled - no longer requests location permission)
+    initLocationServices() {
+        // Location services disabled to prevent permission requests
+        // Users can still use distance filters if they manually enable location
+    }
+
+    // Enhanced Search with New Filters
+    getActiveFilters() {
+        const form = document.getElementById('filter-form');
+        if (!form) return {};
+
+        const formData = new FormData(form);
+        const filters = {};
+
+        // Existing filters
+        const tags = formData.getAll('tags');
+        if (tags.length > 0) {
+            filters.tags = tags;
+        }
+
+        const statuses = formData.getAll('status');
+        if (statuses.length > 0) {
+            filters.status = statuses;
+        }
+
+        const jobTypeCheckboxes = form.querySelectorAll('input[id^="job-type-"]:checked');
+        if (jobTypeCheckboxes.length > 0) {
+            filters.jobType = Array.from(jobTypeCheckboxes).map(cb => cb.value);
+        }
+
+        const college = formData.get('college');
+        if (college) {
+            filters.college = [college];
+        }
+
+        const location = formData.get('location');
+        if (location) {
+            filters.location = location;
+        }
+
+        const timeFilter = formData.get('timeFilter');
+        if (timeFilter) {
+            filters.timeFilter = timeFilter;
+        }
+
+        // New filters
+        const minPrice = document.getElementById('min-price')?.value;
+        const maxPrice = document.getElementById('max-price')?.value;
+        if (minPrice || maxPrice) {
+            filters.priceRange = {
+                min: parseInt(minPrice) || 0,
+                max: parseInt(maxPrice) || 999999
+            };
+        }
+
+        const ratingFilter = document.getElementById('rating-filter')?.value;
+        if (ratingFilter) {
+            filters.minRating = parseFloat(ratingFilter);
+        }
+
+        const distanceFilter = document.getElementById('distance-filter')?.value;
+        if (distanceFilter && this.userLocation) {
+            filters.maxDistance = parseInt(distanceFilter);
+            filters.userLocation = this.userLocation;
+        }
+
+        return filters;
+    }
+
+    // Profile and Rating System
+    createFillerProfile(userEmail) {
+        // Create a universal sample profile for demonstration
+        return {
+            email: userEmail,
+            name: 'Sample User',
+            college: 'Sample University',
+            year: 'Junior',
+            major: 'Computer Science',
+            bio: 'This is a sample profile for demonstration purposes. In a real application, this would show the actual user\'s information and profile details.',
+            skills: ['Problem Solving', 'Communication', 'Time Management'],
+            rating: 4.2,
+            totalRatings: 12,
+            profilePicture: null // Will use default avatar
+        };
+    }
+
+    showUserProfile(userEmail) {
+        let user = dataManager.getUserByEmail(userEmail);
+        
+        // If user doesn't exist, create a filler profile
+        if (!user) {
+            user = this.createFillerProfile(userEmail);
+        }
+
+        // Store current profile user for messaging
+        this.currentProfileUser = userEmail;
+
+        const modal = new bootstrap.Modal(document.getElementById('profile-modal'));
+        const content = document.getElementById('profile-modal-content');
+        
+        content.innerHTML = `
+            <div class="profile-modal-content">
+                <div class="profile-header">
+                    <div class="profile-avatar-large">
+                        <img src="${user.profilePicture || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjYwIiBjeT0iNjAiIHI9IjYwIiBmaWxsPSIjRjFGNUY5Ii8+Cjxzdmcgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiB2aWV3Qm94PSIwIDAgNjAgNjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeD0iMzAiIHk9IjMwIj4KPGNpcmNsZSBjeD0iMzAiIGN5PSIyMiIgcj0iOCIgZmlsbD0iIzZCNzI4MCIvPgo8cGF0aCBkPSJNMTUgNDVjMC02LjYzIDUuMzctMTIgMTItMTJzMTIgNS4zNyAxMiAxMnYxNUgxNXYtMTV6IiBmaWxsPSIjNkI3MjgwIi8+Cjwvc3ZnPgo8L3N2Zz4K'}" 
+                             alt="${user.name}" class="rounded-circle">
+                    </div>
+                    <div class="profile-info">
+                        <h4 class="profile-name">${user.name}</h4>
+                        ${user.rating > 0 ? `
+                            <div class="profile-rating-display">
+                                <div class="stars-large">
+                                    ${Array.from({length: 5}, (_, i) => 
+                                        `<i class="bi bi-star${i < Math.floor(user.rating) ? '-fill' : ''}"></i>`
+                                    ).join('')}
+                                </div>
+                                <span class="rating-large">${user.rating} (${user.totalRatings} reviews)</span>
+                            </div>
+                        ` : '<div class="no-rating-large">No ratings yet</div>'}
+                        <div class="profile-meta">
+                            <div class="meta-item">${user.college || 'No college specified'}</div>
+                            <div class="meta-item">${user.year || 'No year'} • ${user.major || 'No major'}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="profile-details">
+                    <div class="detail-section">
+                        <h5 class="section-title">About</h5>
+                        <p class="section-content">${user.bio || 'No bio available.'}</p>
+                    </div>
+                    
+                    ${user.skills && user.skills.length > 0 ? `
+                        <div class="detail-section">
+                            <h5 class="section-title">Skills</h5>
+                            <div class="skills-container">
+                                ${user.skills.map(skill => `<span class="skill-badge">${skill}</span>`).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="detail-section">
+                        <h5 class="section-title">Contact</h5>
+                        <div class="contact-info">
+                            <div class="contact-item">
+                                <i class="bi bi-envelope"></i>
+                                <span>${user.email}</span>
+                            </div>
+                            ${user.phone ? `
+                                <div class="contact-item">
+                                    <i class="bi bi-telephone"></i>
+                                    <span>${user.phone}</span>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Store current profile user for messaging
+        this.currentProfileUser = userEmail;
+        modal.show();
+    }
+
+    // Task Completion Workflow
+    showTaskCompletionModal(taskId) {
+        const modal = new bootstrap.Modal(document.getElementById('completion-modal'));
+        document.getElementById('completion-task-id').value = taskId;
+        modal.show();
+    }
+
+    handleTaskCompletion(form) {
+        const formData = new FormData(form);
+        const taskId = parseInt(formData.get('taskId'));
+        
+        const completionData = {
+            notes: formData.get('notes'),
+            photos: [], // Would handle file uploads in real implementation
+            paymentConfirmed: formData.get('paymentConfirmed') === 'on'
+        };
+
+        dataManager.markTaskAsCompleted(taskId, completionData);
+        
+        const modal = bootstrap.Modal.getInstance(document.getElementById('completion-modal'));
+        modal.hide();
+        
+        this.showSuccess('Task marked as completed!');
+        form.reset();
+    }
+
+    // Utility Methods
+    formatTime(dateString) {
+        const date = new Date(dateString);
+        return date.toLocaleTimeString('en-US', { 
+            hour: 'numeric', 
+            minute: '2-digit',
+            hour12: true 
+        });
+    }
 }
 
 // Global functions for HTML onclick handlers
@@ -1132,8 +1836,163 @@ function logout() {
     app.logout();
 }
 
+// New global functions for enhanced features
+function showUserProfile(userEmail) {
+    if (window.app) {
+        window.app.showUserProfile(userEmail);
+    }
+}
+
+function startConversation(userEmail) {
+    if (window.app) {
+        window.app.startConversation(userEmail);
+    }
+}
+
+function startConversationFromProfile() {
+    if (window.app && window.app.currentProfileUser) {
+        // Close the profile modal
+        const profileModal = bootstrap.Modal.getInstance(document.getElementById('profile-modal'));
+        if (profileModal) {
+            profileModal.hide();
+        }
+        
+        // Start conversation with the current profile user
+        window.app.startConversation(window.app.currentProfileUser);
+    }
+}
+
+function showUserProfileFromTaskDetail() {
+    // Get the current task's poster email
+    const taskId = new URLSearchParams(window.location.search).get('id');
+    if (taskId && window.app) {
+        const task = dataManager.getTaskById(taskId);
+        if (task) {
+            window.app.showUserProfile(task.posterEmail);
+        }
+    }
+}
+
+function showMessagesModal() {
+    const modal = new bootstrap.Modal(document.getElementById('messages-modal'));
+    app.loadConversations();
+    modal.show();
+}
+
+function markAllNotificationsRead() {
+    if (app.currentUserData) {
+        dataManager.markAllNotificationsAsRead(app.currentUserData.id);
+        app.loadNotifications();
+    }
+}
+
+function clearFilters() {
+    const form = document.getElementById('filter-form');
+    if (form) {
+        form.reset();
+        // Clear advanced filters
+        const minPrice = document.getElementById('min-price');
+        const maxPrice = document.getElementById('max-price');
+        const ratingFilter = document.getElementById('rating-filter');
+        const distanceFilter = document.getElementById('distance-filter');
+        
+        if (minPrice) minPrice.value = '';
+        if (maxPrice) maxPrice.value = '';
+        if (ratingFilter) ratingFilter.value = '';
+        if (distanceFilter) distanceFilter.value = '';
+        
+        // Trigger change event to reload tasks
+        const event = new Event('change');
+        form.dispatchEvent(event);
+    }
+}
+
+// Enhanced search functionality
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('search-input');
+    const searchClear = document.getElementById('search-clear');
+    
+    if (searchClear) {
+        searchClear.addEventListener('click', () => {
+            if (searchInput) {
+                searchInput.value = '';
+                const event = new Event('input');
+                searchInput.dispatchEvent(event);
+            }
+        });
+    }
+    
+    // Handle completion form
+    const completionForm = document.getElementById('completion-form');
+    if (completionForm) {
+        completionForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            app.handleTaskCompletion(completionForm);
+        });
+    }
+});
+
+// Global functions for header
+function performSearch() {
+    if (window.app) {
+        window.app.performSearch();
+    }
+}
+
+function toggleProfileDropdown() {
+    if (window.app) {
+        window.app.toggleProfileDropdown();
+    }
+}
+
+function showRegisterModal() {
+    // Show registration modal (you can implement this)
+    alert('Registration modal would open here');
+}
+
+function selectSuggestion(suggestion) {
+    const searchInput = document.getElementById('header-search-input');
+    if (searchInput) {
+        searchInput.value = suggestion;
+        performSearch();
+    }
+}
+
+function showNotifications() {
+    if (window.app) {
+        window.app.showNotifications();
+    }
+}
+
+function openMessagesModal() {
+    if (window.app) {
+        window.app.openMessagesModal();
+    }
+}
+
+
 // Initialize app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.app = new GetItDoneApp();
+    
+    // Close profile dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        const profileDropdown = document.getElementById('profile-dropdown');
+        const profileAvatar = document.querySelector('.profile-avatar-header');
+        
+        if (profileDropdown && profileAvatar && !profileDropdown.contains(e.target) && !profileAvatar.contains(e.target)) {
+            profileDropdown.classList.remove('show');
+        }
+    });
+
+    // Handle search form submission
+    const headerSearchInput = document.getElementById('header-search-input');
+    if (headerSearchInput) {
+        headerSearchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+    }
 });
 
