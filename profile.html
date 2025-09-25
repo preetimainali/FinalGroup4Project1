@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>User Profile - GetItDone</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-primary" href="index.html">
+                <i class="bi bi-check-circle-fill me-2"></i>GetItDone
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="browse.html">Browse Tasks</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="post.html">Post a Task</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="my-stuff.html">My Stuff</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showLoginModal()">Login</a>
+                    </li>
+                    
+                    <!-- User Profile Dropdown (shown when logged in) -->
+                    <li class="nav-item" id="user-menu" style="display: none;">
+                        <div class="dropdown">
+                            <button class="btn btn-link dropdown-toggle d-flex align-items-center" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <div class="profile-avatar me-2"></div>
+                                <span class="user-name">User</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><h6 class="dropdown-header">My Account</h6></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="account.html"><i class="bi bi-person-circle me-2"></i>My Profile</a></li>
+                                <li><a class="dropdown-item" href="my-stuff.html"><i class="bi bi-briefcase me-2"></i>My Tasks</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" onclick="openMessagesModal()"><i class="bi bi-chat-dots me-2"></i>Messages <span class="badge bg-danger ms-2" id="message-badge-nav" style="display: none;">0</span></a></li>
+                                <li><a class="dropdown-item" href="#" onclick="showNotifications()"><i class="bi bi-bell me-2"></i>Notifications <span class="badge bg-danger ms-2" id="notification-badge-nav" style="display: none;">0</span></a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="rules.html"><i class="bi bi-shield-check me-2"></i>Rules & Safety</a></li>
+                                <li><a class="dropdown-item" href="about.html"><i class="bi bi-info-circle me-2"></i>About</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" onclick="logout()"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container py-4">
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">User Profile</li>
+            </ol>
+        </nav>
+
+        <div class="row">
+            <!-- Profile Sidebar -->
+            <div class="col-lg-4 mb-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="profile-avatar-container">
+                            <img src="" alt="Profile Picture" id="profile-picture" class="rounded-circle mb-3 profile-picture">
+                        </div>
+                        <h4 id="profile-name" class="profile-name-display">Loading...</h4>
+                        <div id="profile-rating" class="mb-3 profile-rating-container">
+                            <!-- Rating will be loaded here -->
+                        </div>
+                        <div class="profile-meta-info text-muted mb-3">
+                            <div id="profile-college" class="meta-line"></div>
+                            <div id="profile-year-major" class="meta-line"></div>
+                        </div>
+                        
+                        <!-- Action Buttons -->
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary" id="message-profile-btn" onclick="startConversationFromProfile()">
+                                <i class="bi bi-chat-dots me-2"></i>Send Message
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="window.history.back()">
+                                <i class="bi bi-arrow-left me-2"></i>Go Back
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contact Info -->
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h6 class="card-title">Contact Information</h6>
+                        <div class="mb-2">
+                            <i class="bi bi-envelope me-2"></i>
+                            <span id="profile-email"></span>
+                        </div>
+                        <div id="profile-phone-container" style="display: none;">
+                            <i class="bi bi-telephone me-2"></i>
+                            <span id="profile-phone"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Content -->
+            <div class="col-lg-8">
+                <!-- About Section -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">About</h5>
+                        <p id="profile-bio" class="text-muted">No bio available.</p>
+                    </div>
+                </div>
+
+                <!-- Skills Section -->
+                <div class="card mb-4" id="skills-section" style="display: none;">
+                    <div class="card-body">
+                        <h5 class="card-title">Skills</h5>
+                        <div id="profile-skills">
+                            <!-- Skills will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Tasks Section -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Recent Tasks</h5>
+                        <div id="profile-tasks">
+                            <!-- Tasks will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reviews Section -->
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Reviews</h5>
+                        <div id="profile-reviews">
+                            <!-- Reviews will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Messages Modal (reused from browse.html) -->
+    <div class="modal fade" id="messages-modal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Messages</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="row g-0" style="height: 500px;">
+                        <!-- Conversations List -->
+                        <div class="col-md-4 border-end">
+                            <div class="p-3 border-bottom">
+                                <h6 class="mb-0">Conversations</h6>
+                            </div>
+                            <div id="conversations-list-full" style="height: 420px; overflow-y: auto;">
+                                <!-- Conversations will be loaded here -->
+                            </div>
+                        </div>
+                        <!-- Messages Area -->
+                        <div class="col-md-8 d-flex flex-column">
+                            <div id="messages-area" class="flex-grow-1 p-3" style="overflow-y: auto;">
+                                <div class="text-center text-muted py-5">
+                                    <i class="bi bi-chat-dots display-4 mb-3"></i>
+                                    <p>Select a conversation to start messaging</p>
+                                </div>
+                            </div>
+                            <div id="message-compose" class="border-top p-3" style="display: none;">
+                                <form id="message-form">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="message-input" placeholder="Type your message...">
+                                        <button class="btn btn-primary" type="submit">
+                                            <i class="bi bi-send"></i>
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal fade" id="login-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Log In</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="login-form">
+                        <div class="mb-3">
+                            <label for="login-email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="login-email" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="login-password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="login-password" name="password" required>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Log In</button>
+                        </div>
+                    </form>
+                    <div class="text-center mt-3">
+                        <p class="mb-0">Don't have an account? <a href="#" onclick="showRegisterModal()">Sign up</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div class="modal fade" id="register-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Sign Up</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="register-form">
+                        <div class="mb-3">
+                            <label for="register-name" class="form-label">Full Name *</label>
+                            <input type="text" class="form-control" id="register-name" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="register-email" class="form-label">Email *</label>
+                            <input type="email" class="form-control" id="register-email" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="register-phone" class="form-label">Phone Number</label>
+                            <input type="tel" class="form-control" id="register-phone" name="phone">
+                        </div>
+                        <div class="mb-3">
+                            <label for="register-password" class="form-label">Password *</label>
+                            <input type="password" class="form-control" id="register-password" name="password" required minlength="6">
+                            <div class="form-text">Password must be at least 6 characters long.</div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">Sign Up</button>
+                        </div>
+                    </form>
+                    <div class="text-center mt-3">
+                        <p class="mb-0">Already have an account? <a href="#" onclick="showLoginModal()">Log in</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+    <script>
+        // Profile page specific functionality
+        let profileUserEmail = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get user email from URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            profileUserEmail = urlParams.get('email');
+            
+            if (profileUserEmail) {
+                loadUserProfile(profileUserEmail);
+            } else {
+                // Redirect to home if no user specified
+                window.location.href = 'index.html';
+            }
+        });
+
+        function loadUserProfile(userEmail) {
+            const user = dataManager.getUserByEmail(userEmail);
+            if (!user) {
+                showError('User not found');
+                return;
+            }
+
+            // Load profile information
+            document.getElementById('profile-picture').src = user.profilePicture || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjYwIiBjeT0iNjAiIHI9IjYwIiBmaWxsPSIjRjFGNUY5Ii8+Cjxzdmcgd2lkdGg9IjYwIiBoZWlnaHQ9IjYwIiB2aWV3Qm94PSIwIDAgNjAgNjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeD0iMzAiIHk9IjMwIj4KPGNpcmNsZSBjeD0iMzAiIGN5PSIyMiIgcj0iOCIgZmlsbD0iIzZCNzI4MCIvPgo8cGF0aCBkPSJNMTUgNDVjMC02LjYzIDUuMzctMTIgMTItMTJzMTIgNS4zNyAxMiAxMnYxNUgxNXYtMTV6IiBmaWxsPSIjNkI3MjgwIi8+Cjwvc3ZnPgo8L3N2Zz4K';
+            document.getElementById('profile-name').textContent = user.name;
+            document.getElementById('profile-email').textContent = user.email;
+            
+            if (user.phone) {
+                document.getElementById('profile-phone').textContent = user.phone;
+                document.getElementById('profile-phone-container').style.display = 'block';
+            }
+            
+            document.getElementById('profile-bio').textContent = user.bio || 'No bio available.';
+            document.getElementById('profile-college').textContent = user.college || 'No college specified';
+            document.getElementById('profile-year-major').textContent = `${user.year || 'No year'} • ${user.major || 'No major'}`;
+
+            // Load rating
+            const ratingContainer = document.getElementById('profile-rating');
+            if (user.rating > 0) {
+                ratingContainer.innerHTML = `
+                    <div class="d-flex align-items-center justify-content-center">
+                        ${Array.from({length: 5}, (_, i) => 
+                            `<i class="bi bi-star${i < Math.floor(user.rating) ? '-fill' : ''} text-warning"></i>`
+                        ).join('')}
+                        <span class="ms-2">${user.rating} (${user.totalRatings} reviews)</span>
+                    </div>
+                `;
+            } else {
+                ratingContainer.innerHTML = '<div class="text-muted">No ratings yet</div>';
+            }
+
+            // Load skills
+            if (user.skills && user.skills.length > 0) {
+                const skillsContainer = document.getElementById('profile-skills');
+                skillsContainer.innerHTML = user.skills.map(skill => 
+                    `<span class="badge bg-secondary me-1 mb-1">${skill}</span>`
+                ).join('');
+                document.getElementById('skills-section').style.display = 'block';
+            }
+
+            // Load recent tasks
+            loadUserTasks(userEmail);
+            
+            // Load reviews
+            loadUserReviews(user.id);
+
+            // Update page title
+            document.title = `${user.name} - GetItDone`;
+
+            // Hide message button if viewing own profile
+            const messageBtn = document.getElementById('message-profile-btn');
+            if (window.app.currentUser === userEmail) {
+                messageBtn.style.display = 'none';
+            }
+        }
+
+        function loadUserTasks(userEmail) {
+            const tasks = dataManager.getAllTasks().filter(task => task.posterEmail === userEmail);
+            const tasksContainer = document.getElementById('profile-tasks');
+            
+            if (tasks.length === 0) {
+                tasksContainer.innerHTML = '<p class="text-muted">No tasks posted yet.</p>';
+                return;
+            }
+
+            tasksContainer.innerHTML = '';
+            tasks.slice(0, 5).forEach(task => {
+                const taskElement = document.createElement('div');
+                taskElement.className = 'border-bottom pb-3 mb-3';
+                taskElement.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">${task.title}</h6>
+                            <p class="text-muted small mb-2">${task.description.substring(0, 100)}${task.description.length > 100 ? '...' : ''}</p>
+                            <div class="d-flex align-items-center">
+                                <span class="badge bg-success me-2">$${task.payAmount}</span>
+                                <span class="status-badge status-${task.status}">${task.status.charAt(0).toUpperCase() + task.status.slice(1)}</span>
+                            </div>
+                        </div>
+                        <a href="task-detail.html?id=${task.id}" class="btn btn-sm btn-outline-primary">View</a>
+                    </div>
+                `;
+                tasksContainer.appendChild(taskElement);
+            });
+        }
+
+        function loadUserReviews(userId) {
+            const reviews = dataManager.getRatingsByUserId(userId);
+            const reviewsContainer = document.getElementById('profile-reviews');
+            
+            if (reviews.length === 0) {
+                reviewsContainer.innerHTML = '<p class="text-muted">No reviews yet.</p>';
+                return;
+            }
+
+            reviewsContainer.innerHTML = '';
+            reviews.forEach(review => {
+                const reviewElement = document.createElement('div');
+                reviewElement.className = 'border-bottom pb-3 mb-3';
+                reviewElement.innerHTML = `
+                    <div class="d-flex align-items-start">
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-center mb-2">
+                                ${Array.from({length: 5}, (_, i) => 
+                                    `<i class="bi bi-star${i < review.rating ? '-fill' : ''} text-warning"></i>`
+                                ).join('')}
+                                <span class="ms-2 fw-medium">${review.reviewerName}</span>
+                                <span class="ms-2 text-muted small">${new Date(review.createdAt).toLocaleDateString()}</span>
+                            </div>
+                            <p class="mb-0">${review.comment || 'No comment provided.'}</p>
+                        </div>
+                    </div>
+                `;
+                reviewsContainer.appendChild(reviewElement);
+            });
+        }
+
+        function startConversationFromProfile() {
+            if (!window.app.currentUser) {
+                window.app.showError('Please log in to send messages');
+                showLoginModal();
+                return;
+            }
+            
+            showMessagesModal();
+            setTimeout(() => {
+                window.app.selectConversation(profileUserEmail);
+            }, 100);
+        }
+
+        // Global functions (reused from browse.html)
+        function showMessagesModal() {
+            const modal = new bootstrap.Modal(document.getElementById('messages-modal'));
+            window.app.loadConversations();
+            modal.show();
+        }
+
+        function showLoginModal() {
+            const modal = new bootstrap.Modal(document.getElementById('login-modal'));
+            modal.show();
+        }
+
+        function showRegisterModal() {
+            const modal = new bootstrap.Modal(document.getElementById('register-modal'));
+            modal.show();
+        }
+
+        function logout() {
+            window.app.logout();
+        }
+
+        function markAllNotificationsRead() {
+            if (window.app.currentUserData) {
+                dataManager.markAllNotificationsAsRead(window.app.currentUserData.id);
+                window.app.loadNotifications();
+            }
+        }
+    </script>
+</body>
+</html>
