@@ -427,19 +427,45 @@ class DataManager {
 
     addTask(taskData) {
         const tasks = this.getAllTasks();
+        
         const newTask = {
             id: this.getNextId(tasks),
             ...taskData,
             status: 'open',
             createdAt: new Date().toISOString()
         };
+        
         tasks.push(newTask);
         localStorage.setItem('getitdone_tasks', JSON.stringify(tasks));
         
         // Track posted task for the user
         this.trackPostedTask(newTask.posterEmail, newTask.id);
         
+        // Also save to database (async, don't wait for it)
+        this.saveTaskToDatabase(newTask);
+        
         return newTask;
+    }
+
+    // Save task to database (async, non-blocking)
+    async saveTaskToDatabase(task) {
+        try {
+            const response = await fetch('/api/tasks.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(task)
+            });
+            
+            if (response.ok) {
+                console.log('Task saved to database successfully');
+            } else {
+                console.log('Database save failed, but task saved to localStorage');
+            }
+        } catch (error) {
+            console.log('Database connection failed, but task saved to localStorage');
+        }
     }
 
     // Track posted tasks by user
@@ -454,6 +480,34 @@ class DataManager {
             status: 'active'
         });
         localStorage.setItem('getitdone_posted_tasks', JSON.stringify(postedTasks));
+    }
+
+    // Delete a task
+    deleteTask(taskId) {
+        const tasks = this.getAllTasks();
+        const taskIndex = tasks.findIndex(task => task.id === taskId);
+        
+        if (taskIndex === -1) {
+            return false; // Task not found
+        }
+        
+        // Remove task from tasks array
+        tasks.splice(taskIndex, 1);
+        localStorage.setItem('getitdone_tasks', JSON.stringify(tasks));
+        
+        // Remove from posted tasks tracking
+        const postedTasks = this.getPostedTasks();
+        for (const userEmail in postedTasks) {
+            const userTasks = postedTasks[userEmail];
+            const userTaskIndex = userTasks.findIndex(task => task.taskId === taskId);
+            if (userTaskIndex !== -1) {
+                userTasks.splice(userTaskIndex, 1);
+                break;
+            }
+        }
+        localStorage.setItem('getitdone_posted_tasks', JSON.stringify(postedTasks));
+        
+        return true; // Task deleted successfully
     }
 
     // Get posted tasks for a user

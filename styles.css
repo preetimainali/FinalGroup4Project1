@@ -38,6 +38,89 @@
     box-sizing: border-box;
 }
 
+/* Disabled form styles */
+.form-control:disabled,
+.form-select:disabled {
+    background-color: #f8f9fa;
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* Login prompt styles */
+#login-prompt-section {
+    display: none !important;
+}
+
+#login-prompt-section .alert {
+    border-left: 4px solid #ffc107;
+    animation: pulse 2s infinite;
+}
+
+#user-info-section .alert {
+    border-left: 4px solid #198754;
+}
+
+/* Force hide login elements by default */
+#login-prompt-section,
+#login-overlay {
+    display: none !important;
+}
+
+/* Login overlay styles */
+#login-overlay {
+    backdrop-filter: blur(5px);
+    animation: fadeIn 0.5s ease-in;
+}
+
+#login-overlay .display-1 {
+    animation: bounce 1s infinite;
+}
+
+/* Form interaction styles for guests */
+#post-task-card {
+    transition: all 0.3s ease;
+}
+
+#post-task-card.guest-mode {
+    transform: scale(0.98);
+    opacity: 0.7;
+}
+
+/* Enhanced alert styles */
+.alert-danger.enhanced {
+    box-shadow: 0 0 20px rgba(220, 53, 69, 0.3);
+    border: 2px solid #dc3545;
+    animation: glow 2s infinite alternate;
+}
+
+/* Animations */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+    100% { transform: scale(1); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-10px); }
+    60% { transform: translateY(-5px); }
+}
+
+@keyframes glow {
+    from { box-shadow: 0 0 20px rgba(220, 53, 69, 0.3); }
+    to { box-shadow: 0 0 30px rgba(220, 53, 69, 0.6); }
+}
+
 html {
     font-size: 16px;
     -webkit-text-size-adjust: 100%;

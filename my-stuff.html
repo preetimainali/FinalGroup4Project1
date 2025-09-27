@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>My Stuff - GetItDone</title>
+    <title>My Tasks - GetItDone</title>
     
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -123,14 +123,14 @@
         <nav aria-label="breadcrumb" class="mb-4">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="index.html">Home</a></li>
-                <li class="breadcrumb-item active" aria-current="page">My Stuff</li>
+                <li class="breadcrumb-item active" aria-current="page">My Tasks</li>
             </ol>
         </nav>
 
         <!-- Header -->
         <div class="text-center mb-5">
-            <h1 class="display-5 fw-bold mb-3">My Stuff</h1>
-            <p class="lead text-muted">Manage your posted tasks and track your applications.</p>
+            <h1 class="display-5 fw-bold mb-3 text-dark">My Tasks</h1>
+            <p class="lead text-dark">Manage your posted tasks and track your applications.</p>
         </div>
 
         <!-- User Email Input (if not logged in) -->
@@ -171,7 +171,7 @@
                             <div class="card text-center">
                                 <div class="card-body">
                                     <h5 class="card-title text-primary" id="total-tasks">0</h5>
-                                    <p class="card-text text-muted">Total Tasks</p>
+                                    <p class="card-text text-white">Total Tasks</p>
                                 </div>
                             </div>
                         </div>
@@ -179,7 +179,7 @@
                             <div class="card text-center">
                                 <div class="card-body">
                                     <h5 class="card-title text-success" id="open-tasks">0</h5>
-                                    <p class="card-text text-muted">Open</p>
+                                    <p class="card-text text-white">Open</p>
                                 </div>
                             </div>
                         </div>
@@ -187,7 +187,7 @@
                             <div class="card text-center">
                                 <div class="card-body">
                                     <h5 class="card-title text-warning" id="assigned-tasks">0</h5>
-                                    <p class="card-text text-muted">Assigned</p>
+                                    <p class="card-text text-white">Assigned</p>
                                 </div>
                             </div>
                         </div>
@@ -195,7 +195,7 @@
                             <div class="card text-center">
                                 <div class="card-body">
                                     <h5 class="card-title text-info" id="completed-tasks">0</h5>
-                                    <p class="card-text text-muted">Completed</p>
+                                    <p class="card-text text-white">Completed</p>
                                 </div>
                             </div>
                         </div>
@@ -204,6 +204,35 @@
                     <!-- Posted Tasks List -->
                     <div id="my-posted-tasks">
                         <!-- Tasks will be populated by JavaScript -->
+                    </div>
+                    
+                    <!-- Debug Buttons -->
+                    <div class="mt-3 text-center">
+                        <button type="button" class="btn btn-warning btn-sm me-2 mb-2" onclick="debugMyTasks()">
+                            Debug My Tasks
+                        </button>
+                        <button type="button" class="btn btn-success btn-sm me-2 mb-2" onclick="createTestTask()">
+                            Create Test Task
+                        </button>
+                        <button type="button" class="btn btn-info btn-sm me-2 mb-2" onclick="checkLocalStorage()">
+                            Check localStorage
+                        </button>
+                        <button type="button" class="btn btn-danger btn-sm me-2 mb-2" onclick="forceDisplayTasks()">
+                            Force Display Tasks
+                        </button>
+                        <button type="button" class="btn btn-primary btn-sm me-2 mb-2" onclick="testDatabase()">
+                            Test Database
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-sm me-2 mb-2" onclick="testAppLogic()">
+                            Test App Logic
+                        </button>
+                    </div>
+                    
+                    <!-- Simple Test Button -->
+                    <div class="mt-3 text-center">
+                        <button type="button" class="btn btn-dark btn-lg" onclick="simpleTest()">
+                            🔍 SIMPLE TEST - Click Me First!
+                        </button>
                     </div>
                 </div>
 
@@ -222,7 +251,7 @@
                             <div class="card text-center">
                                 <div class="card-body">
                                     <h5 class="card-title text-primary" id="total-applications">0</h5>
-                                    <p class="card-text text-muted">Total Applications</p>
+                                    <p class="card-text text-white">Total Applications</p>
                                 </div>
                             </div>
                         </div>
@@ -230,7 +259,7 @@
                             <div class="card text-center">
                                 <div class="card-body">
                                     <h5 class="card-title text-warning" id="pending-applications">0</h5>
-                                    <p class="card-text text-muted">Pending</p>
+                                    <p class="card-text text-white">Pending</p>
                                 </div>
                             </div>
                         </div>
@@ -238,7 +267,7 @@
                             <div class="card text-center">
                                 <div class="card-body">
                                     <h5 class="card-title text-success" id="accepted-applications">0</h5>
-                                    <p class="card-text text-muted">Accepted</p>
+                                    <p class="card-text text-white">Accepted</p>
                                 </div>
                             </div>
                         </div>
@@ -310,7 +339,7 @@
                         <i class="bi bi-check-circle-fill text-primary me-2 fs-4"></i>
                         <h5 class="mb-0 fw-bold">GetItDone</h5>
                     </div>
-                    <p class="text-muted mb-3">Connecting students with tasks that need to be done. A platform built by students, for students.</p>
+                    <p class="text-white mb-3">Connecting students with tasks that need to be done. A platform built by students, for students.</p>
                     <div class="d-flex gap-3">
                         <a href="#" class="text-light fs-5"><i class="bi bi-facebook"></i></a>
                         <a href="#" class="text-light fs-5"><i class="bi bi-twitter"></i></a>
@@ -321,42 +350,42 @@
                 <div class="col-lg-2 col-md-6 mb-4">
                     <h6 class="fw-bold mb-3 text-primary">Platform</h6>
                     <ul class="list-unstyled">
-                        <li class="mb-2"><a href="browse.html" class="text-muted text-decoration-none">Browse Tasks</a></li>
-                        <li class="mb-2"><a href="post.html" class="text-muted text-decoration-none">Post a Task</a></li>
-                        <li class="mb-2"><a href="my-stuff.html" class="text-muted text-decoration-none">My Stuff</a></li>
-                        <li class="mb-2"><a href="account.html" class="text-muted text-decoration-none">Account</a></li>
+                        <li class="mb-2"><a href="browse.html" class="text-white text-decoration-none">Browse Tasks</a></li>
+                        <li class="mb-2"><a href="post.html" class="text-white text-decoration-none">Post a Task</a></li>
+                        <li class="mb-2"><a href="my-stuff.html" class="text-white text-decoration-none">My Tasks</a></li>
+                        <li class="mb-2"><a href="account.html" class="text-white text-decoration-none">Account</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-2 col-md-6 mb-4">
                     <h6 class="fw-bold mb-3 text-primary">Support</h6>
                     <ul class="list-unstyled">
-                        <li class="mb-2"><a href="rules.html" class="text-muted text-decoration-none">Rules & Safety</a></li>
-                        <li class="mb-2"><a href="about.html" class="text-muted text-decoration-none">About Us</a></li>
-                        <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Help Center</a></li>
-                        <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Contact Support</a></li>
+                        <li class="mb-2"><a href="rules.html" class="text-white text-decoration-none">Rules & Safety</a></li>
+                        <li class="mb-2"><a href="about.html" class="text-white text-decoration-none">About Us</a></li>
+                        <li class="mb-2"><a href="#" class="text-white text-decoration-none">Help Center</a></li>
+                        <li class="mb-2"><a href="#" class="text-white text-decoration-none">Contact Support</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-2 col-md-6 mb-4">
                     <h6 class="fw-bold mb-3 text-primary">Legal</h6>
                     <ul class="list-unstyled">
-                        <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Privacy Policy</a></li>
-                        <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Terms of Service</a></li>
-                        <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Cookie Policy</a></li>
-                        <li class="mb-2"><a href="#" class="text-muted text-decoration-none">Community Guidelines</a></li>
+                        <li class="mb-2"><a href="rules.html#privacy-policy" class="text-white text-decoration-none">Privacy Policy</a></li>
+                        <li class="mb-2"><a href="rules.html#terms-of-service" class="text-white text-decoration-none">Terms of Service</a></li>
+                        <li class="mb-2"><a href="rules.html#cookie-policy" class="text-white text-decoration-none">Cookie Policy</a></li>
+                        <li class="mb-2"><a href="rules.html#community-guidelines" class="text-white text-decoration-none">Community Guidelines</a></li>
                     </ul>
                 </div>
                 <div class="col-lg-2 col-md-6 mb-4">
                     <h6 class="fw-bold mb-3 text-primary">Contact</h6>
                     <ul class="list-unstyled">
-                        <li class="mb-2 text-muted">
+                        <li class="mb-2 text-white">
                             <i class="bi bi-envelope me-2"></i>
-                            <a href="mailto:support@getitdone.com" class="text-muted text-decoration-none">support@getitdone.com</a>
+                            <a href="mailto:support@getitdone.com" class="text-white text-decoration-none">support@getitdone.com</a>
                         </li>
-                        <li class="mb-2 text-muted">
+                        <li class="mb-2 text-white">
                             <i class="bi bi-telephone me-2"></i>
-                            <a href="tel:+15551234567" class="text-muted text-decoration-none">(555) 123-4567</a>
+                            <a href="tel:+15551234567" class="text-white text-decoration-none">(555) 123-4567</a>
                         </li>
-                        <li class="mb-2 text-muted">
+                        <li class="mb-2 text-white">
                             <i class="bi bi-geo-alt me-2"></i>
                             <span>University of Alabama<br>Tuscaloosa, AL 35401</span>
                         </li>
@@ -366,10 +395,10 @@
             <hr class="my-4 border-secondary">
             <div class="row align-items-center">
                 <div class="col-md-6">
-                    <p class="text-muted mb-0">&copy; 2024 GetItDone. All rights reserved. Student project for educational purposes.</p>
+                    <p class="text-white mb-0">&copy; 2024 GetItDone. All rights reserved. Student project for educational purposes.</p>
                 </div>
                 <div class="col-md-6 text-md-end">
-                    <p class="text-muted mb-0">
+                    <p class="text-white mb-0">
                         <i class="bi bi-shield-check me-1"></i>
                         Secure & Trusted Platform
                     </p>
@@ -388,7 +417,7 @@
                 </div>
                 <div class="modal-body">
                     <div id="notifications-modal-list">
-                        <div class="text-center text-muted py-3">No notifications</div>
+                        <div class="text-center text-white py-3">No notifications</div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -411,7 +440,7 @@
                     <div class="row">
                         <div class="col-md-4">
                             <div class="list-group" id="conversations-list-modal">
-                                <div class="text-center text-muted py-3">No conversations</div>
+                                <div class="text-center text-white py-3">No conversations</div>
                             </div>
                         </div>
                         <div class="col-md-8">
@@ -420,7 +449,7 @@
                                     <h6 id="conversation-title">Select a conversation</h6>
                                 </div>
                                 <div class="messages-container border rounded p-3 mb-3" style="height: 300px; overflow-y: auto;" id="messages-container-modal">
-                                    <div class="text-center text-muted">Select a conversation to view messages</div>
+                                    <div class="text-center text-white">Select a conversation to view messages</div>
                                 </div>
                                 <form id="message-form-modal">
                                     <div class="input-group">
@@ -429,7 +458,7 @@
                                     </div>
                                 </form>
                             </div>
-                            <div id="no-conversation-selected" class="text-center text-muted py-5">
+                            <div id="no-conversation-selected" class="text-center text-white py-5">
                                 <i class="bi bi-chat-dots fs-1"></i>
                                 <p>Select a conversation to start messaging</p>
                             </div>
@@ -497,7 +526,7 @@
             const container = document.getElementById('modal-applications');
 
             if (applications.length === 0) {
-                container.innerHTML = '<p class="text-muted">No applications yet.</p>';
+                container.innerHTML = '<p class="text-white">No applications yet.</p>';
                 return;
             }
 
@@ -528,7 +557,7 @@
                     </div>
                     <div class="applicant-note">${app.note}</div>
                     <div class="mt-2">
-                        <small class="text-muted">Applied: ${new Date(app.createdAt).toLocaleDateString()}</small>
+                        <small class="text-white">Applied: ${new Date(app.createdAt).toLocaleDateString()}</small>
                     </div>
                 `;
 
@@ -663,18 +692,333 @@
             }, 500);
         });
 
-        // Initialize the app and load My Stuff content
-        document.addEventListener('DOMContentLoaded', () => {
-            // Initialize the app
-            window.app = new App();
+        // Note: App initialization is handled in app.js
+
+        // Debug function
+        function debugMyTasks() {
+            console.log('=== DEBUG MY TASKS ===');
+            console.log('Current user:', window.app?.currentUser);
+            console.log('All tasks:', dataManager.getAllTasks());
+            console.log('My tasks container:', document.getElementById('my-posted-tasks'));
             
-            // Load My Stuff content
-            if (window.app.currentUser) {
+            if (window.app) {
+                console.log('Manually calling loadMyStuff...');
                 window.app.loadMyStuff();
             } else {
-                window.app.showLoginPrompt();
+                console.error('App not found!');
             }
-        });
+        }
+
+        // Create test task function
+        function createTestTask() {
+            console.log('Creating test task...');
+            const currentUser = window.app?.currentUser;
+            if (!currentUser) {
+                alert('Please log in first');
+                return;
+            }
+
+            const testTask = {
+                title: 'Test Task - ' + new Date().toLocaleTimeString(),
+                description: 'This is a test task created from My Stuff page',
+                tags: ['test'],
+                payType: 'flat',
+                payAmount: 25,
+                date: new Date().toISOString().split('T')[0],
+                timeWindow: 'Morning (9:00 AM - 12:00 PM)',
+                jobType: 'local',
+                college: '',
+                locationType: 'Campus',
+                locationName: 'Test Location',
+                address: '123 Test St',
+                coordinates: null,
+                posterName: 'Test User',
+                posterEmail: currentUser
+            };
+            
+            try {
+                const newTask = dataManager.addTask(testTask);
+                console.log('Test task created successfully:', newTask);
+                alert('Test task created! ID: ' + newTask.id);
+                
+                // Refresh the page
+                if (window.app) {
+                    window.app.loadMyStuff();
+                }
+            } catch (error) {
+                console.error('Error creating test task:', error);
+                alert('Error: ' + error.message);
+            }
+        }
+
+        // Force display tasks function
+        function forceDisplayTasks() {
+            console.log('=== FORCE DISPLAY TASKS ===');
+            const container = document.getElementById('my-posted-tasks');
+            if (!container) {
+                console.error('Container not found');
+                return;
+            }
+
+            const currentUser = localStorage.getItem('getitdone_current_user');
+            console.log('Current user:', currentUser);
+            
+            const allTasks = JSON.parse(localStorage.getItem('getitdone_tasks') || '[]');
+            console.log('All tasks:', allTasks);
+            
+            const myTasks = allTasks.filter(task => task.posterEmail === currentUser);
+            console.log('My tasks:', myTasks);
+            
+            if (myTasks.length === 0) {
+                container.innerHTML = '<p class="text-muted">No tasks found. Creating a test task...</p>';
+                
+                // Create a test task
+                const testTask = {
+                    title: 'Force Display Test Task',
+                    description: 'This task was created to test display',
+                    tags: ['test'],
+                    payType: 'flat',
+                    payAmount: 30,
+                    date: new Date().toISOString().split('T')[0],
+                    timeWindow: 'Afternoon',
+                    jobType: 'local',
+                    college: 'University of Alabama - Tuscaloosa',
+                    locationType: 'Campus',
+                    locationName: 'Test Location',
+                    address: '123 Test St',
+                    coordinates: null,
+                    posterName: 'Test User',
+                    posterEmail: currentUser,
+                    status: 'open',
+                    createdAt: new Date().toISOString()
+                };
+                
+                allTasks.push(testTask);
+                localStorage.setItem('getitdone_tasks', JSON.stringify(allTasks));
+                
+                // Now display it
+                const taskElement = document.createElement('div');
+                taskElement.className = 'card mb-3';
+                taskElement.innerHTML = `
+                    <div class="card-body">
+                        <h5 class="card-title">${testTask.title}</h5>
+                        <p class="card-text">${testTask.description}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">$${testTask.payAmount} • ${testTask.timeWindow}</small>
+                            <div>
+                                <button class="btn btn-sm btn-outline-primary me-2">Edit</button>
+                                <button class="btn btn-sm btn-outline-danger">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(taskElement);
+                
+            } else {
+                // Display existing tasks
+                container.innerHTML = '';
+                myTasks.forEach(task => {
+                    const taskElement = document.createElement('div');
+                    taskElement.className = 'card mb-3';
+                    taskElement.innerHTML = `
+                        <div class="card-body">
+                            <h5 class="card-title">${task.title}</h5>
+                            <p class="card-text">${task.description}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">$${task.payAmount} • ${task.timeWindow}</small>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-primary me-2">Edit</button>
+                                    <button class="btn btn-sm btn-outline-danger">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(taskElement);
+                });
+            }
+        }
+
+        // Simple test to check if the issue is with the app logic
+        function testAppLogic() {
+            console.log('=== TESTING APP LOGIC ===');
+            
+            // Check if app exists
+            if (!window.app) {
+                console.error('App not found!');
+                return;
+            }
+            
+            // Check current user
+            console.log('App current user:', window.app.currentUser);
+            console.log('localStorage current user:', localStorage.getItem('getitdone_current_user'));
+            
+            // Check if loadMyStuff is working
+            console.log('Calling loadMyStuff...');
+            window.app.loadMyStuff();
+            
+            // Check if loadMyPostedTasks is working
+            console.log('Calling loadMyPostedTasks...');
+            window.app.loadMyPostedTasks();
+        }
+
+        // Simple comprehensive test
+        function simpleTest() {
+            console.log('=== SIMPLE COMPREHENSIVE TEST ===');
+            
+            // 1. Check if we're logged in
+            const currentUser = localStorage.getItem('getitdone_current_user');
+            console.log('1. Current user:', currentUser);
+            
+            if (!currentUser) {
+                alert('❌ NOT LOGGED IN! Please log in first.');
+                return;
+            }
+            
+            // 2. Check if app exists
+            if (!window.app) {
+                alert('❌ APP NOT FOUND! Something is wrong with the app initialization.');
+                return;
+            }
+            
+            // 3. Check localStorage tasks
+            const allTasks = JSON.parse(localStorage.getItem('getitdone_tasks') || '[]');
+            console.log('2. All tasks in localStorage:', allTasks.length);
+            
+            // 4. Check my tasks
+            const myTasks = allTasks.filter(task => task.posterEmail === currentUser);
+            console.log('3. My tasks:', myTasks.length);
+            
+            // 5. Check container
+            const container = document.getElementById('my-posted-tasks');
+            console.log('4. Container found:', !!container);
+            
+            // 6. Try to display tasks
+            if (myTasks.length > 0) {
+                console.log('5. Displaying tasks...');
+                container.innerHTML = '';
+                myTasks.forEach(task => {
+                    const taskElement = document.createElement('div');
+                    taskElement.className = 'card mb-3';
+                    taskElement.innerHTML = `
+                        <div class="card-body">
+                            <h5 class="card-title">${task.title}</h5>
+                            <p class="card-text">${task.description}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">$${task.payAmount} • ${task.timeWindow}</small>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-primary me-2">Edit</button>
+                                    <button class="btn btn-sm btn-outline-danger">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(taskElement);
+                });
+                alert(`✅ SUCCESS! Found and displayed ${myTasks.length} tasks.`);
+            } else {
+                console.log('5. No tasks found, creating test task...');
+                const testTask = {
+                    id: Date.now(),
+                    title: 'Test Task - ' + new Date().toLocaleTimeString(),
+                    description: 'This is a test task created by the simple test',
+                    tags: ['test'],
+                    payType: 'flat',
+                    payAmount: 25,
+                    date: new Date().toISOString().split('T')[0],
+                    timeWindow: 'Morning',
+                    jobType: 'local',
+                    college: 'University of Alabama - Tuscaloosa',
+                    locationType: 'Campus',
+                    locationName: 'Test Location',
+                    address: '123 Test St',
+                    coordinates: null,
+                    posterName: 'Test User',
+                    posterEmail: currentUser,
+                    status: 'open',
+                    createdAt: new Date().toISOString()
+                };
+                
+                allTasks.push(testTask);
+                localStorage.setItem('getitdone_tasks', JSON.stringify(allTasks));
+                
+                // Display the test task
+                container.innerHTML = '';
+                const taskElement = document.createElement('div');
+                taskElement.className = 'card mb-3';
+                taskElement.innerHTML = `
+                    <div class="card-body">
+                        <h5 class="card-title">${testTask.title}</h5>
+                        <p class="card-text">${testTask.description}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted">$${testTask.payAmount} • ${testTask.timeWindow}</small>
+                            <div>
+                                <button class="btn btn-sm btn-outline-primary me-2">Edit</button>
+                                <button class="btn btn-sm btn-outline-danger">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(taskElement);
+                
+                alert('✅ SUCCESS! Created and displayed a test task.');
+            }
+        }
+
+        // Check localStorage directly
+        function checkLocalStorage() {
+            console.log('=== CHECKING LOCALSTORAGE ===');
+            console.log('All localStorage keys:', Object.keys(localStorage));
+            
+            // Check all possible user keys
+            console.log('getitdone_current_user:', localStorage.getItem('getitdone_current_user'));
+            console.log('current_user:', localStorage.getItem('current_user'));
+            console.log('user_data:', localStorage.getItem('user_data'));
+            
+            // Check all possible task keys
+            console.log('getitdone_tasks:', localStorage.getItem('getitdone_tasks'));
+            console.log('posted_tasks:', localStorage.getItem('posted_tasks'));
+            
+            // Parse and show tasks
+            const allTasks = JSON.parse(localStorage.getItem('getitdone_tasks') || '[]');
+            console.log('Parsed getitdone_tasks:', allTasks);
+            console.log('Number of tasks:', allTasks.length);
+            
+            // Check current user
+            const currentUser = localStorage.getItem('getitdone_current_user');
+            console.log('Current user:', currentUser);
+            
+            if (currentUser && allTasks.length > 0) {
+                const myTasks = allTasks.filter(task => task.posterEmail === currentUser);
+                console.log('My tasks:', myTasks);
+                console.log('Number of my tasks:', myTasks.length);
+            }
+        }
+
+        // Test database connection
+        async function testDatabase() {
+            console.log('=== TESTING DATABASE CONNECTION ===');
+            try {
+                const response = await fetch('/api/tasks.php');
+                console.log('Database response status:', response.status);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Database response:', data);
+                    console.log('Number of tasks in database:', data.tasks ? data.tasks.length : 0);
+                    
+                    const currentUser = localStorage.getItem('getitdone_current_user');
+                    if (currentUser && data.tasks) {
+                        const myTasks = data.tasks.filter(task => task.posterEmail === currentUser);
+                        console.log('My tasks in database:', myTasks);
+                        console.log('Number of my tasks in database:', myTasks.length);
+                    }
+                } else {
+                    console.error('Database connection failed:', response.status, response.statusText);
+                }
+            } catch (error) {
+                console.error('Database connection error:', error);
+            }
+        }
     </script>
 </body>
 </html>
