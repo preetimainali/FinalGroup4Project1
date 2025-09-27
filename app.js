@@ -58,11 +58,17 @@ class GetItDoneApp {
         return null;
     }
 
+
     setCurrentUser(email) {
         localStorage.setItem('getitdone_current_user', email);
         this.currentUser = email;
         this.currentUserData = this.getCurrentUserData();
         this.updateNavigation();
+        
+        // Update post page if we're on it
+        if (this.getCurrentPage() === 'post') {
+            this.updatePostPageUserInfo();
+        }
     }
 
     logout() {
@@ -70,6 +76,12 @@ class GetItDoneApp {
         this.currentUser = null;
         this.currentUserData = null;
         this.updateNavigation();
+        
+        // Update post page if we're on it
+        if (this.getCurrentPage() === 'post') {
+            this.updatePostPageUserInfo();
+        }
+        
         this.showSuccess('Logged out successfully');
         // Redirect to home page
         window.location.href = 'index.html';
@@ -153,10 +165,13 @@ class GetItDoneApp {
 
     loadAllTasks(filters = {}) {
         const container = document.getElementById('tasks-container');
-        if (!container) return;
+        if (!container) {
+            return;
+        }
 
         const searchQuery = document.getElementById('search-input')?.value || '';
         const tasks = dataManager.searchTasks(searchQuery, filters);
+        
         const sortBy = document.getElementById('sort-select')?.value || 'newest';
         const sortedTasks = dataManager.sortTasks(tasks, sortBy);
 
@@ -617,30 +632,217 @@ class GetItDoneApp {
     initPostPage() {
         this.setupPostForm();
         this.updatePostPageUserInfo();
+        
+        // Add modal event listeners to update page state when modals are closed
+        this.setupModalEventListeners();
+    }
+
+    setupModalEventListeners() {
+        const loginModal = document.getElementById('login-modal');
+        const registerModal = document.getElementById('register-modal');
+        
+        if (loginModal) {
+            loginModal.addEventListener('hidden.bs.modal', () => {
+                // Update page state when login modal is closed
+                this.updatePostPageUserInfo();
+                this.updatePostFormState();
+            });
+        }
+        
+        if (registerModal) {
+            registerModal.addEventListener('hidden.bs.modal', () => {
+                // Update page state when register modal is closed
+                this.updatePostPageUserInfo();
+                this.updatePostFormState();
+            });
+        }
     }
 
     updatePostPageUserInfo() {
+        const loginPromptSection = document.getElementById('login-prompt-section');
+        const userInfoSection = document.getElementById('user-info-section');
         const userInfoNotice = document.getElementById('user-info-notice');
-        if (userInfoNotice) {
-            if (this.currentUser && this.currentUserData) {
-                userInfoNotice.innerHTML = `Logged in as <strong>${this.currentUserData.name}</strong> (${this.currentUser})`;
-            } else {
-                userInfoNotice.textContent = 'Please log in to post a task.';
+        const loginOverlay = document.getElementById('login-overlay');
+        
+        // Force refresh user data
+        this.currentUser = this.getCurrentUser();
+        this.currentUserData = this.getCurrentUserData();
+        
+        console.log('updatePostPageUserInfo - Current user:', this.currentUser);
+        console.log('updatePostPageUserInfo - Current user data:', this.currentUserData);
+        
+        if (this.currentUser && this.currentUserData) {
+            // User is logged in - show user info, hide login prompt and overlay
+            console.log('User is logged in - hiding login elements');
+            if (loginPromptSection) {
+                loginPromptSection.style.display = 'none';
+                console.log('Login prompt hidden');
+            }
+            if (userInfoSection) {
+                userInfoSection.style.display = 'block';
+                console.log('User info shown');
+            }
+            if (loginOverlay) {
+                loginOverlay.style.display = 'none';
+                console.log('Login overlay hidden');
+            }
+            if (userInfoNotice) {
+                userInfoNotice.innerHTML = `<strong>${this.currentUserData.name}</strong> (${this.currentUser})`;
+                console.log('User info notice updated');
+            }
+        } else {
+            // User is not logged in - show login prompt and overlay, hide user info
+            console.log('User is not logged in - showing login elements');
+            if (loginPromptSection) {
+                loginPromptSection.style.display = 'block';
+                console.log('Login prompt shown');
+            }
+            if (userInfoSection) {
+                userInfoSection.style.display = 'none';
+                console.log('User info hidden');
+            }
+            if (loginOverlay) {
+                loginOverlay.style.display = 'flex';
+                console.log('Login overlay shown');
             }
         }
+        
+        // Update form state
+        this.updatePostFormState();
     }
 
     setupPostForm() {
         const form = document.getElementById('post-task-form');
-        if (!form) return;
+        if (!form) {
+            return;
+        }
 
-        form.addEventListener('submit', (e) => {
+        // Remove any existing event listeners to avoid duplicates
+        if (this.handleFormSubmit) {
+            form.removeEventListener('submit', this.handleFormSubmit);
+        }
+        
+        // Create bound function for event listener
+        this.handleFormSubmit = (e) => {
             e.preventDefault();
             this.handlePostTask(form);
-        });
+        };
+        
+        form.addEventListener('submit', this.handleFormSubmit);
+
+        // ALSO add direct click handler to the submit button
+        const submitButton = document.getElementById('post-task-button');
+        if (submitButton) {
+            submitButton.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.handlePostTask(form);
+            });
+        }
+
+        // Add interaction handlers for guests
+        this.setupGuestFormInteraction();
 
         // Setup tag input
         this.setupTagInput();
+        
+        // Update form state based on login status
+        this.updatePostFormState();
+    }
+
+    setupGuestFormInteraction() {
+        const form = document.getElementById('post-task-form');
+        const formFields = form?.querySelectorAll('input, textarea, select');
+        const submitButton = form?.querySelector('button[type="submit"]');
+        
+        if (!form || !formFields || !submitButton) return;
+
+        // Add click handlers to form fields for guests
+        formFields.forEach(field => {
+            field.addEventListener('focus', () => {
+                if (!this.currentUser) {
+                    this.showGuestInteractionAlert();
+                }
+            });
+            
+            field.addEventListener('click', () => {
+                if (!this.currentUser) {
+                    this.showGuestInteractionAlert();
+                }
+            });
+        });
+
+        // Add click handler to submit button for guests
+        submitButton.addEventListener('click', () => {
+            if (!this.currentUser) {
+                this.showGuestInteractionAlert();
+            }
+        });
+    }
+
+    showGuestInteractionAlert() {
+        // Create a prominent alert that appears when guests try to interact
+        const existingAlert = document.getElementById('guest-interaction-alert');
+        if (existingAlert) {
+            existingAlert.remove();
+        }
+
+        const alert = document.createElement('div');
+        alert.id = 'guest-interaction-alert';
+        alert.className = 'alert alert-danger alert-dismissible fade show position-fixed';
+        alert.style.cssText = 'top: 20px; left: 50%; transform: translateX(-50%); z-index: 9999; max-width: 500px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);';
+        
+        alert.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="bi bi-exclamation-triangle-fill fs-2 me-3"></i>
+                <div class="flex-grow-1">
+                    <h5 class="alert-heading mb-1">Login Required!</h5>
+                    <p class="mb-0">You need to be logged in to post a task. Please create an account or log in to continue.</p>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+
+        document.body.appendChild(alert);
+
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.remove();
+            }
+        }, 5000);
+    }
+
+    updatePostFormState() {
+        const form = document.getElementById('post-task-form');
+        const submitButton = form?.querySelector('button[type="submit"]');
+        const formFields = form?.querySelectorAll('input, textarea, select');
+        const postCard = document.getElementById('post-task-card');
+        
+        if (this.currentUser && this.currentUserData) {
+            // User is logged in - enable form
+            if (submitButton) {
+                submitButton.disabled = false;
+                submitButton.textContent = 'Post Task';
+            }
+            if (formFields) {
+                formFields.forEach(field => field.disabled = false);
+            }
+            if (postCard) {
+                postCard.classList.remove('guest-mode');
+            }
+        } else {
+            // User is not logged in - disable form
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.textContent = 'Login Required';
+            }
+            if (formFields) {
+                formFields.forEach(field => field.disabled = true);
+            }
+            if (postCard) {
+                postCard.classList.add('guest-mode');
+            }
+        }
     }
 
     setupTagInput() {
@@ -701,6 +903,37 @@ class GetItDoneApp {
         });
     }
 
+    // Delete a task
+    deleteTask(taskId) {
+        if (confirm('Are you sure you want to delete this task? This action cannot be undone.')) {
+            const success = dataManager.deleteTask(taskId);
+            if (success) {
+                this.showSuccess('Task deleted successfully!');
+                // Refresh the current page
+                if (this.getCurrentPage() === 'my-stuff') {
+                    this.loadMyStuff();
+                } else if (this.getCurrentPage() === 'browse') {
+                    this.loadAllTasks();
+                }
+            } else {
+                this.showError('Failed to delete task. Please try again.');
+            }
+        }
+    }
+
+    // Edit a task
+    editTask(taskId) {
+        const task = dataManager.getTaskById(taskId);
+        if (!task) {
+            this.showError('Task not found.');
+            return;
+        }
+
+        // Redirect to post page with task data for editing
+        const taskData = encodeURIComponent(JSON.stringify(task));
+        window.location.href = `post.html?edit=${taskId}&data=${taskData}`;
+    }
+
     handlePostTask(form) {
         // Check if user is logged in
         if (!this.currentUser) {
@@ -741,16 +974,21 @@ class GetItDoneApp {
             return;
         }
 
-        // Add task
-        const newTask = dataManager.addTask(taskData);
+        try {
+            // Add task
+            const newTask = dataManager.addTask(taskData);
 
-        // Show success message
-        this.showSuccess('Task posted successfully!');
-        
-        // Redirect to task detail
-        setTimeout(() => {
-            window.location.href = `task-detail.html?id=${newTask.id}`;
-        }, 1500);
+            // Show success message
+            this.showSuccess('Task posted successfully!');
+            
+            // Redirect to browse page to see the posted task
+            setTimeout(() => {
+                window.location.href = 'browse.html';
+            }, 1500);
+        } catch (error) {
+            console.error('Error adding task:', error);
+            this.showError('Error posting task: ' + error.message);
+        }
     }
 
     validateTaskData(data) {
@@ -788,6 +1026,13 @@ class GetItDoneApp {
             return false;
         }
 
+        // Check safety agreement
+        const safetyAgreement = document.getElementById('safety-agreement');
+        if (!safetyAgreement || !safetyAgreement.checked) {
+            this.showError('You must agree to the safety guidelines to post a task');
+            return false;
+        }
+
         return true;
     }
 
@@ -797,11 +1042,14 @@ class GetItDoneApp {
     }
 
     loadMyStuff() {
+        console.log('loadMyStuff called, current user:', this.currentUser);
         if (!this.currentUser) {
+            console.log('No user logged in, showing login prompt');
             this.showLoginPrompt();
             return;
         }
 
+        console.log('Loading posted tasks and applications...');
         this.loadMyPostedTasks();
         this.loadMyApplications();
     }
@@ -821,31 +1069,56 @@ class GetItDoneApp {
     }
 
     loadMyPostedTasks() {
+        console.log('=== LOAD MY POSTED TASKS ===');
+        console.log('loadMyPostedTasks called');
+        
         const container = document.getElementById('my-posted-tasks');
         if (!container) {
-            console.log('My posted tasks container not found');
+            console.error('my-posted-tasks container not found');
             return;
         }
-
-        console.log('Loading posted tasks for user:', this.currentUser);
+        
+        // Force refresh current user data
+        this.currentUser = this.getCurrentUser();
+        console.log('Current user email (refreshed):', this.currentUser);
+        console.log('Current user type:', typeof this.currentUser);
         
         const allTasks = dataManager.getAllTasks();
-        console.log('All tasks:', allTasks);
+        console.log('All tasks from localStorage:', allTasks);
+        console.log('Number of total tasks:', allTasks.length);
+        
+        // Check each task's posterEmail
+        allTasks.forEach((task, index) => {
+            console.log(`Task ${index}:`, {
+                id: task.id,
+                title: task.title,
+                posterEmail: task.posterEmail,
+                posterEmailType: typeof task.posterEmail,
+                matches: task.posterEmail === this.currentUser,
+                exactMatch: task.posterEmail === this.currentUser,
+                includesMatch: task.posterEmail && task.posterEmail.includes(this.currentUser)
+            });
+        });
         
         const myTasks = allTasks.filter(task => task.posterEmail === this.currentUser);
-        console.log('My tasks:', myTasks);
+        console.log('Filtered my tasks:', myTasks);
+        console.log('Number of my tasks:', myTasks.length);
 
         container.innerHTML = '';
 
         if (myTasks.length === 0) {
+            console.log('No tasks found for user');
             container.innerHTML = '<p class="text-muted">You haven\'t posted any tasks yet.</p>';
             return;
         }
+
+        console.log('Found', myTasks.length, 'tasks for user');
 
         // Sort tasks by creation date (newest first)
         myTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
         myTasks.forEach(task => {
+            console.log('Creating element for task:', task.title);
             const taskElement = this.createMyTaskElement(task);
             container.appendChild(taskElement);
         });
@@ -1048,7 +1321,15 @@ class GetItDoneApp {
                         <span class="badge bg-success me-2">$${task.payAmount}</span>
                         <small class="text-muted">Due: ${this.formatDate(task.date)}</small>
                     </div>
-                    <a href="task-detail.html?id=${task.id}" class="btn btn-outline-primary btn-sm">View Details</a>
+                    <div>
+                        <a href="task-detail.html?id=${task.id}" class="btn btn-outline-primary btn-sm me-2">View Details</a>
+                        <button class="btn btn-outline-warning btn-sm me-2" onclick="app.editTask(${task.id})">
+                            <i class="bi bi-pencil me-1"></i>Edit
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm" onclick="app.deleteTask(${task.id})">
+                            <i class="bi bi-trash me-1"></i>Delete
+                        </button>
+                    </div>
                 </div>
             </div>
         `;
@@ -1222,6 +1503,14 @@ class GetItDoneApp {
             modal.hide();
             this.showSuccess(`Welcome back, ${user.name}!`);
             form.reset();
+            
+            // Force update post page state after modal is closed
+            setTimeout(() => {
+                if (this.getCurrentPage() === 'post') {
+                    this.updatePostPageUserInfo();
+                    this.updatePostFormState();
+                }
+            }, 300);
         } else {
             this.showError('Invalid email or password');
         }
@@ -1269,6 +1558,14 @@ class GetItDoneApp {
         modal.hide();
         this.showSuccess(`Welcome to GetItDone, ${newUser.name}!`);
         form.reset();
+        
+        // Force update post page state after modal is closed
+        setTimeout(() => {
+            if (this.getCurrentPage() === 'post') {
+                this.updatePostPageUserInfo();
+                this.updatePostFormState();
+            }
+        }, 300);
     }
 
     setupApplyModal() {
@@ -1946,8 +2243,8 @@ function toggleProfileDropdown() {
 }
 
 function showRegisterModal() {
-    // Show registration modal (you can implement this)
-    alert('Registration modal would open here');
+    const modal = new bootstrap.Modal(document.getElementById('register-modal'));
+    modal.show();
 }
 
 function selectSuggestion(suggestion) {
@@ -1973,7 +2270,20 @@ function openMessagesModal() {
 
 // Initialize app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, initializing app...');
     window.app = new GetItDoneApp();
+    
+    // Initialize specific pages
+    const currentPage = window.app.getCurrentPage();
+    console.log('Current page:', currentPage);
+    
+    if (currentPage === 'post') {
+        console.log('Initializing post page...');
+        window.app.initPostPage();
+    } else if (currentPage === 'my-stuff') {
+        console.log('Initializing my stuff page...');
+        window.app.initMyStuffPage();
+    }
     
     // Close profile dropdown when clicking outside
     document.addEventListener('click', (e) => {

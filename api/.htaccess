@@ -1,0 +1,32 @@
+RewriteEngine On
+
+# Handle preflight requests
+RewriteCond %{REQUEST_METHOD} OPTIONS
+RewriteRule ^(.*)$ $1 [R=200,L]
+
+# Route API requests
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Tasks API
+RewriteRule ^tasks/?$ tasks.php [QSA,L]
+RewriteRule ^tasks/([0-9]+)/?$ tasks.php [QSA,L]
+
+# Users API
+RewriteRule ^users/?$ users.php [QSA,L]
+RewriteRule ^users/([^/]+)/?$ users.php [QSA,L]
+RewriteRule ^users/login/?$ users.php [QSA,L]
+RewriteRule ^users/register/?$ users.php [QSA,L]
+
+# Applications API
+RewriteRule ^applications/?$ applications.php [QSA,L]
+RewriteRule ^applications/([0-9]+)/?$ applications.php [QSA,L]
+
+# Messages API
+RewriteRule ^messages/?$ messages.php [QSA,L]
+RewriteRule ^messages/([0-9]+)/?$ messages.php [QSA,L]
+
+# Notifications API
+RewriteRule ^notifications/?$ notifications.php [QSA,L]
+RewriteRule ^notifications/([0-9]+)/?$ notifications.php [QSA,L]
+RewriteRule ^notifications/mark_all_read/?$ notifications.php?mark_all_read=1 [QSA,L]
