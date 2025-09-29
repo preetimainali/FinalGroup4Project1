@@ -1,145 +1,142 @@
-# Group 4 Project 1 - GetItDone
+# GetItDone - Task Management Platform
 
-A simple, local gig board for quick, everyday tasks built as a student project for MIS 321 - Web Development.
+A modern web application that connects students with tasks that need to be done. Built with HTML, CSS, JavaScript, and Bootstrap.
 
-## Overview
+## 🌟 Features
 
-GetItDone connects people in your community for quick, everyday tasks. Whether you need help assembling furniture, walking your dog, or running errands, we make it easy to find reliable help nearby.
+- **User Registration & Authentication** - Create accounts and login securely
+- **Task Posting** - Post tasks with detailed descriptions, location, and payment
+- **Task Browsing** - Browse and search for available tasks
+- **Application System** - Apply to tasks and manage applications
+- **Messaging System** - Communicate between task posters and helpers
+- **Notification System** - Real-time notifications for updates
+- **Dashboard** - Track your posted tasks, applications, and earnings
+- **Profile Management** - Manage your profile and view statistics
 
-## Features
+## 🚀 Getting Started
 
-- **Post Tasks**: Create tasks with descriptions, pay amounts, locations, and tags
-- **Browse & Filter**: Find tasks by category, location, time, and status
-- **Apply to Help**: Submit applications with availability and experience details
-- **Task Management**: Track your posted tasks and manage applications
-- **Application Tracking**: Monitor the status of your applications
-- **Mobile-First Design**: Responsive design that works on all devices
-- **Safety Guidelines**: Clear rules and safety information
+### Prerequisites
 
-## Technology Stack
+- A modern web browser (Chrome, Firefox, Safari, Edge)
+- Python 3 (for local development server)
 
-- **HTML5 & CSS3**: Modern web standards
-- **Bootstrap 5**: Responsive design framework
-- **Vanilla JavaScript**: No complex frameworks
-- **LocalStorage**: Client-side data persistence
-- **Bootstrap Icons**: Clean, consistent iconography
+### Installation
 
-## Project Structure
-
-```
-mis321/
-├── index.html          # Homepage
-├── browse.html         # Browse tasks page
-├── task-detail.html    # Individual task details
-├── post.html          # Post a new task
-├── my-stuff.html      # User dashboard
-├── rules.html         # Rules and safety guidelines
-├── about.html         # About page
-├── styles.css         # Custom CSS styles
-├── data.js           # Data management and sample data
-├── app.js            # Main application logic
-└── README.md         # This file
+1. Clone the repository:
+```bash
+git clone https://github.com/YOUR_USERNAME/getitdone.git
+cd getitdone
 ```
 
-## Getting Started
+2. Start a local development server:
+```bash
+python3 -m http.server 8000
+```
 
-1. **Clone or Download**: Get the project files
-2. **Open in Browser**: Open `index.html` in a web browser
-3. **Start Using**: No installation required - it's a client-side application
+3. Open your browser and navigate to:
+```
+http://localhost:8000
+```
 
-## How It Works
+## 🧪 Test Accounts
 
-### For Task Posters:
-1. **Post a Task**: Describe what you need, when, where, and how much you'll pay
-2. **Review Applications**: See who wants to help and their qualifications
-3. **Assign Helper**: Choose the best applicant for your task
-4. **Mark Complete**: Confirm when the work is done
+For testing purposes, you can use these sample accounts:
 
-### For Helpers:
-1. **Browse Tasks**: Find tasks that match your skills and availability
-2. **Apply**: Submit a short application with your experience
-3. **Get Assigned**: Wait for the poster to choose you
-4. **Complete Work**: Do the task and get paid
+- **Email:** `test@example.com` **Password:** `test123`
+- **Email:** `ally@example.com` **Password:** `password123`
+- **Email:** `jessica@example.com` **Password:** `password123`
 
-## Sample Tasks
+## 💻 Technology Stack
 
-The application comes with sample data including:
-- Pet care (feeding cats, dog walking)
-- Assembly help (furniture, picture frames)
-- Moving assistance (boxes, deliveries)
-- Errands (grocery runs, printing)
-- Study help (tutoring, study partners)
-- Tech support (laptop cleanup)
+- **Frontend:** HTML5, CSS3, JavaScript (ES6+)
+- **UI Framework:** Bootstrap 5.3
+- **Icons:** Bootstrap Icons
+- **Data Storage:** LocalStorage (client-side)
+- **Development Server:** Python HTTP Server
 
-## Safety Features
+## 📱 Features Overview
 
-- **Public Meetings Only**: All tasks must be completed in public spaces
-- **Clear Guidelines**: Comprehensive safety rules and best practices
-- **Payment After Completion**: No upfront payments required
-- **Identity Verification**: Encourages meeting verification
-- **Emergency Contacts**: Quick access to help resources
+### For Task Posters
+- Create detailed task posts with location, timing, and payment
+- Review and approve helper applications
+- Communicate with helpers through messaging
+- Track task completion and payments
 
-## Data Management
+### For Helpers
+- Browse available tasks by category and location
+- Apply to tasks with personalized messages
+- Receive notifications about application status
+- Track earnings and completed tasks
 
-The application uses localStorage for data persistence, which means:
-- Data persists between browser sessions
-- No server required
-- Works offline
-- Data is stored locally on the user's device
+### Platform Features
+- 5% platform fee on all transactions
+- Secure user authentication
+- Real-time notifications
+- Responsive design for mobile and desktop
 
-## Browser Compatibility
+## 🎯 How It Works
 
-- Chrome (recommended)
-- Firefox
-- Safari
-- Edge
-- Mobile browsers
+1. **Post a Task** - Describe what you need, when, where, and how much you'll pay
+2. **Apply** - Helpers nearby see your task and apply with a quick message
+3. **Get it Done** - Pick a helper, complete the work, and pay when done
 
-## Educational Context
+## 📁 Project Structure
 
-This project was created for **MIS 321 - Web Development** as a learning exercise in:
-- Front-end web development
-- User experience design
-- Responsive design principles
-- JavaScript application logic
-- Data management and persistence
+```
+Group4Project1/
+├── index.html                 # Main entry point
+├── pages/                     # Application pages
+│   ├── index.html            # Home page
+│   ├── browse.html           # Task browsing
+│   ├── post.html             # Task posting
+│   ├── task-detail.html      # Task details
+│   ├── my-stuff.html         # User dashboard
+│   └── account.html          # User profile
+├── assets/
+│   ├── scripts/
+│   │   ├── app.js            # Main application logic
+│   │   └── data.js           # Data management
+│   └── styles/
+│       └── styles.css        # Custom styles
+└── backend/                  # Backend API (PHP)
+    └── api/
+        ├── config.php        # Database configuration
+        └── users.php         # User API endpoints
+```
 
-## Demo Scenarios
+## 🔧 Development
 
-### Scenario 1: Ally's Cat Feeding
-1. Ally posts: "Feed my two cats Fri–Sun, $45 total, 5 min from Riverside"
-2. A helper nearby applies with availability
-3. Ally assigns the helper
-4. Helper completes daily check-ins and gets paid $45 after day 3
+### Local Development
+1. Clone the repository
+2. Start a local server: `python3 -m http.server 8000`
+3. Open `http://localhost:8000` in your browser
 
-### Scenario 2: Jessica's Futon Assembly
-1. Jessica posts: "Assemble futon, this afternoon, $30, Lakeside Apts lobby"
-2. A neighbor applies with assembly experience
-3. Jessica assigns the neighbor
-4. 30 minutes later it's done and payment is made
+### Data Management
+The application uses LocalStorage for client-side data persistence. To reset data:
+```javascript
+// In browser console
+localStorage.clear();
+location.reload();
+```
 
-## Future Enhancements
+## 🤝 Contributing
 
-Potential improvements for future versions:
-- Real-time chat between posters and helpers
-- In-app payment processing
-- Identity verification system
-- Ratings and reviews
-- Push notifications
-- Recurring task scheduling
-- Admin analytics dashboard
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature-name`
+3. Commit your changes: `git commit -am 'Add some feature'`
+4. Push to the branch: `git push origin feature-name`
+5. Submit a pull request
 
-## Disclaimer
+## 📄 License
 
-**This is a student project for educational purposes only.** This platform is not a commercial service and is provided "as is" without any warranties. Users participate at their own risk. The developers and educational institution are not responsible for any disputes, injuries, or losses that may occur through the use of this platform.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Contact
+## 👥 Authors
 
-For questions about this project:
-- **Email**: getitdone@university.edu
-- **Course**: MIS 321 - Web Development
-- **Instructor**: Dr. Smith
+- **Your Name** - *Initial work* - [YourGitHub](https://github.com/yourusername)
 
----
+## 🙏 Acknowledgments
 
-*Built with ❤️ by first-time web developers*
+- Bootstrap for the UI framework
+- Unsplash for profile pictures
+- University of Alabama for the project context

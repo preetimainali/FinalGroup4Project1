@@ -10,7 +10,7 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../assets/styles/styles.css">
 </head>
 <body>
     <!-- Fiverr-Style Header -->
@@ -160,9 +160,14 @@
                 <div class="tab-pane fade show active" id="posted-tasks" role="tabpanel">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h3 class="fw-bold mb-0">My Posted Tasks</h3>
-                        <a href="post.html" class="btn btn-primary">
-                            <i class="bi bi-plus-circle me-2"></i>Post New Task
-                        </a>
+                        <div>
+                            <button class="btn btn-outline-secondary me-2" onclick="refreshMyStuff()">
+                                <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+                            </button>
+                            <a href="post.html" class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-2"></i>Post New Task
+                            </a>
+                        </div>
                     </div>
 
                     <!-- Stats Cards -->
@@ -170,32 +175,44 @@
                         <div class="col-md-3">
                             <div class="card text-center">
                                 <div class="card-body">
-                                    <h5 class="card-title text-primary" id="total-tasks">0</h5>
-                                    <p class="card-text text-white">Total Tasks</p>
+                                    <h5 class="card-title text-primary" id="total-tasks-desc">0 Posted Tasks</h5>
+                                    <p class="card-text text-white">Total Posted</p>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="card text-center">
                                 <div class="card-body">
-                                    <h5 class="card-title text-success" id="open-tasks">0</h5>
-                                    <p class="card-text text-white">Open</p>
+                                    <h5 class="card-title text-success" id="open-tasks-desc">0 Open</h5>
+                                    <p class="card-text text-white">Currently Open</p>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="card text-center">
                                 <div class="card-body">
-                                    <h5 class="card-title text-warning" id="assigned-tasks">0</h5>
-                                    <p class="card-text text-white">Assigned</p>
+                                    <h5 class="card-title text-warning" id="assigned-tasks-desc">0 Assigned</h5>
+                                    <p class="card-text text-white">In Progress</p>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="card text-center">
                                 <div class="card-body">
-                                    <h5 class="card-title text-info" id="completed-tasks">0</h5>
-                                    <p class="card-text text-white">Completed</p>
+                                    <h5 class="card-title text-info" id="completed-tasks-desc">0 Completed</h5>
+                                    <p class="card-text text-white">Finished</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Spending Stats -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h5 class="card-title text-warning" id="total-spent-desc">Given $0.00</h5>
+                                    <p class="card-text text-white">Total Spent as Poster</p>
                                 </div>
                             </div>
                         </div>
@@ -206,68 +223,73 @@
                         <!-- Tasks will be populated by JavaScript -->
                     </div>
                     
-                    <!-- Debug Buttons -->
-                    <div class="mt-3 text-center">
-                        <button type="button" class="btn btn-warning btn-sm me-2 mb-2" onclick="debugMyTasks()">
-                            Debug My Tasks
-                        </button>
-                        <button type="button" class="btn btn-success btn-sm me-2 mb-2" onclick="createTestTask()">
-                            Create Test Task
-                        </button>
-                        <button type="button" class="btn btn-info btn-sm me-2 mb-2" onclick="checkLocalStorage()">
-                            Check localStorage
-                        </button>
-                        <button type="button" class="btn btn-danger btn-sm me-2 mb-2" onclick="forceDisplayTasks()">
-                            Force Display Tasks
-                        </button>
-                        <button type="button" class="btn btn-primary btn-sm me-2 mb-2" onclick="testDatabase()">
-                            Test Database
-                        </button>
-                        <button type="button" class="btn btn-secondary btn-sm me-2 mb-2" onclick="testAppLogic()">
-                            Test App Logic
-                        </button>
-                    </div>
-                    
-                    <!-- Simple Test Button -->
-                    <div class="mt-3 text-center">
-                        <button type="button" class="btn btn-dark btn-lg" onclick="simpleTest()">
-                            🔍 SIMPLE TEST - Click Me First!
-                        </button>
-                    </div>
                 </div>
 
                 <!-- Applications Tab -->
                 <div class="tab-pane fade" id="applications" role="tabpanel">
                     <div class="d-flex justify-content-between align-items-center mb-4">
                         <h3 class="fw-bold mb-0">My Applications</h3>
-                        <a href="browse.html" class="btn btn-outline-primary">
-                            <i class="bi bi-search me-2"></i>Browse Tasks
-                        </a>
+                        <div>
+                            <button class="btn btn-outline-secondary me-2" onclick="refreshMyStuff()">
+                                <i class="bi bi-arrow-clockwise me-1"></i>Refresh
+                            </button>
+                            <a href="browse.html" class="btn btn-outline-primary">
+                                <i class="bi bi-search me-2"></i>Browse Tasks
+                            </a>
+                        </div>
                     </div>
 
                     <!-- Application Stats -->
                     <div class="row mb-4">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="card text-center">
                                 <div class="card-body">
-                                    <h5 class="card-title text-primary" id="total-applications">0</h5>
+                                    <h5 class="card-title text-primary" id="total-applications-desc">0 Applied</h5>
                                     <p class="card-text text-white">Total Applications</p>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="card text-center">
                                 <div class="card-body">
-                                    <h5 class="card-title text-warning" id="pending-applications">0</h5>
-                                    <p class="card-text text-white">Pending</p>
+                                    <h5 class="card-title text-warning" id="pending-applications-desc">0 Pending</h5>
+                                    <p class="card-text text-white">Awaiting Response</p>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="card text-center">
                                 <div class="card-body">
-                                    <h5 class="card-title text-success" id="accepted-applications">0</h5>
-                                    <p class="card-text text-white">Accepted</p>
+                                    <h5 class="card-title text-success" id="accepted-applications-desc">0 Accepted</h5>
+                                    <p class="card-text text-white">Got the Job</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h5 class="card-title text-danger" id="rejected-applications-desc">0 Rejected</h5>
+                                    <p class="card-text text-white">Not Selected</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Earnings Stats -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h5 class="card-title text-success" id="total-earned-desc">Earned $0.00</h5>
+                                    <p class="card-text text-white">Total Earned as Helper</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card text-center">
+                                <div class="card-body">
+                                    <h5 class="card-title text-info" id="completed-as-helper-desc">0 Completed</h5>
+                                    <p class="card-text text-white">Tasks Finished as Helper</p>
                                 </div>
                             </div>
                         </div>
@@ -341,10 +363,6 @@
                     </div>
                     <p class="text-white mb-3">Connecting students with tasks that need to be done. A platform built by students, for students.</p>
                     <div class="d-flex gap-3">
-                        <a href="#" class="text-light fs-5"><i class="bi bi-facebook"></i></a>
-                        <a href="#" class="text-light fs-5"><i class="bi bi-twitter"></i></a>
-                        <a href="#" class="text-light fs-5"><i class="bi bi-instagram"></i></a>
-                        <a href="#" class="text-light fs-5"><i class="bi bi-linkedin"></i></a>
                     </div>
                 </div>
                 <div class="col-lg-2 col-md-6 mb-4">
@@ -472,8 +490,8 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Custom JS -->
-    <script src="data.js"></script>
-    <script src="app.js"></script>
+    <script src="../assets/scripts/data.js"></script>
+    <script src="../assets/scripts/app.js"></script>
     <script>
         // Additional functions for My Stuff page
         let currentTaskId = null;
@@ -650,16 +668,67 @@
             const myTasks = dataManager.getAllTasks().filter(task => task.posterEmail === window.app.currentUser);
             const myApplications = dataManager.getApplicationsByHelperEmail(window.app.currentUser);
 
-            // Update task stats
-            document.getElementById('total-tasks').textContent = myTasks.length;
-            document.getElementById('open-tasks').textContent = myTasks.filter(t => t.status === 'open').length;
-            document.getElementById('assigned-tasks').textContent = myTasks.filter(t => t.status === 'assigned').length;
-            document.getElementById('completed-tasks').textContent = myTasks.filter(t => t.status === 'completed').length;
+            // Update task stats with descriptions
+            const totalTasks = myTasks.length;
+            const openTasks = myTasks.filter(t => t.status === 'open').length;
+            const assignedTasks = myTasks.filter(t => t.status === 'assigned').length;
+            const completedTasks = myTasks.filter(t => t.status === 'completed').length;
+            
+            document.getElementById('total-tasks-desc').textContent = `${totalTasks} Posted Task${totalTasks !== 1 ? 's' : ''}`;
+            document.getElementById('open-tasks-desc').textContent = `${openTasks} Open`;
+            document.getElementById('assigned-tasks-desc').textContent = `${assignedTasks} Assigned`;
+            document.getElementById('completed-tasks-desc').textContent = `${completedTasks} Completed`;
 
-            // Update application stats
-            document.getElementById('total-applications').textContent = myApplications.length;
-            document.getElementById('pending-applications').textContent = myApplications.filter(a => a.status === 'submitted').length;
-            document.getElementById('accepted-applications').textContent = myApplications.filter(a => a.status === 'accepted').length;
+            // Update application stats with descriptions
+            const totalApplications = myApplications.length;
+            const pendingApplications = myApplications.filter(a => a.status === 'submitted').length;
+            const acceptedApplications = myApplications.filter(a => a.status === 'accepted').length;
+            const rejectedApplications = myApplications.filter(a => a.status === 'rejected').length;
+            
+            document.getElementById('total-applications-desc').textContent = `${totalApplications} Applied`;
+            document.getElementById('pending-applications-desc').textContent = `${pendingApplications} Pending`;
+            document.getElementById('accepted-applications-desc').textContent = `${acceptedApplications} Accepted`;
+            document.getElementById('rejected-applications-desc').textContent = `${rejectedApplications} Rejected`;
+
+            // Calculate spending stats (as poster)
+            const completedPostedTasks = myTasks.filter(t => t.status === 'completed');
+            const totalSpent = completedPostedTasks.reduce((sum, task) => sum + (task.payAmount || 0), 0);
+            
+            document.getElementById('total-spent-desc').textContent = `Given $${totalSpent.toFixed(2)}`;
+            
+            // Calculate user's actual earnings as helper (after platform fees)
+            const acceptedApps = myApplications.filter(a => a.status === 'accepted');
+            const completedAsHelper = acceptedApps.filter(app => {
+                const task = dataManager.getTaskById(app.taskId);
+                return task && task.status === 'completed';
+            });
+            
+            const totalEarned = completedAsHelper.reduce((sum, app) => {
+                const task = dataManager.getTaskById(app.taskId);
+                return sum + (task ? (task.helperPayment || (task.payAmount * 0.95)) : 0);
+            }, 0);
+
+            // Update the earnings stats section (now just showing completion count)
+            document.getElementById('total-earned-desc').textContent = `Earned $${totalEarned.toFixed(2)}`;
+            document.getElementById('completed-as-helper-desc').textContent = `${completedAsHelper.length} Completed`;
+
+            // Also load the actual task and application lists
+            if (window.app.loadMyPostedTasks) {
+                window.app.loadMyPostedTasks();
+            }
+            if (window.app.loadMyApplications) {
+                window.app.loadMyApplications();
+            }
+        }
+
+        // Function to manually refresh the dashboard
+        function refreshMyStuff() {
+            if (window.app) {
+                window.app.initMyStuffPage();
+                updateStats();
+            } else {
+                window.location.reload();
+            }
         }
 
         // Override the createMyTaskElement to include management button
@@ -692,334 +761,19 @@
             }, 500);
         });
 
+        // Update stats when tabs are switched
+        document.addEventListener('shown.bs.tab', function (e) {
+            setTimeout(() => {
+                if (window.app && window.app.currentUser) {
+                    updateStats();
+                }
+            }, 100);
+        });
+
         // Note: App initialization is handled in app.js
 
-        // Debug function
-        function debugMyTasks() {
-            console.log('=== DEBUG MY TASKS ===');
-            console.log('Current user:', window.app?.currentUser);
-            console.log('All tasks:', dataManager.getAllTasks());
-            console.log('My tasks container:', document.getElementById('my-posted-tasks'));
-            
-            if (window.app) {
-                console.log('Manually calling loadMyStuff...');
-                window.app.loadMyStuff();
-            } else {
-                console.error('App not found!');
-            }
-        }
 
-        // Create test task function
-        function createTestTask() {
-            console.log('Creating test task...');
-            const currentUser = window.app?.currentUser;
-            if (!currentUser) {
-                alert('Please log in first');
-                return;
-            }
 
-            const testTask = {
-                title: 'Test Task - ' + new Date().toLocaleTimeString(),
-                description: 'This is a test task created from My Stuff page',
-                tags: ['test'],
-                payType: 'flat',
-                payAmount: 25,
-                date: new Date().toISOString().split('T')[0],
-                timeWindow: 'Morning (9:00 AM - 12:00 PM)',
-                jobType: 'local',
-                college: '',
-                locationType: 'Campus',
-                locationName: 'Test Location',
-                address: '123 Test St',
-                coordinates: null,
-                posterName: 'Test User',
-                posterEmail: currentUser
-            };
-            
-            try {
-                const newTask = dataManager.addTask(testTask);
-                console.log('Test task created successfully:', newTask);
-                alert('Test task created! ID: ' + newTask.id);
-                
-                // Refresh the page
-                if (window.app) {
-                    window.app.loadMyStuff();
-                }
-            } catch (error) {
-                console.error('Error creating test task:', error);
-                alert('Error: ' + error.message);
-            }
-        }
-
-        // Force display tasks function
-        function forceDisplayTasks() {
-            console.log('=== FORCE DISPLAY TASKS ===');
-            const container = document.getElementById('my-posted-tasks');
-            if (!container) {
-                console.error('Container not found');
-                return;
-            }
-
-            const currentUser = localStorage.getItem('getitdone_current_user');
-            console.log('Current user:', currentUser);
-            
-            const allTasks = JSON.parse(localStorage.getItem('getitdone_tasks') || '[]');
-            console.log('All tasks:', allTasks);
-            
-            const myTasks = allTasks.filter(task => task.posterEmail === currentUser);
-            console.log('My tasks:', myTasks);
-            
-            if (myTasks.length === 0) {
-                container.innerHTML = '<p class="text-muted">No tasks found. Creating a test task...</p>';
-                
-                // Create a test task
-                const testTask = {
-                    title: 'Force Display Test Task',
-                    description: 'This task was created to test display',
-                    tags: ['test'],
-                    payType: 'flat',
-                    payAmount: 30,
-                    date: new Date().toISOString().split('T')[0],
-                    timeWindow: 'Afternoon',
-                    jobType: 'local',
-                    college: 'University of Alabama - Tuscaloosa',
-                    locationType: 'Campus',
-                    locationName: 'Test Location',
-                    address: '123 Test St',
-                    coordinates: null,
-                    posterName: 'Test User',
-                    posterEmail: currentUser,
-                    status: 'open',
-                    createdAt: new Date().toISOString()
-                };
-                
-                allTasks.push(testTask);
-                localStorage.setItem('getitdone_tasks', JSON.stringify(allTasks));
-                
-                // Now display it
-                const taskElement = document.createElement('div');
-                taskElement.className = 'card mb-3';
-                taskElement.innerHTML = `
-                    <div class="card-body">
-                        <h5 class="card-title">${testTask.title}</h5>
-                        <p class="card-text">${testTask.description}</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <small class="text-muted">$${testTask.payAmount} • ${testTask.timeWindow}</small>
-                            <div>
-                                <button class="btn btn-sm btn-outline-primary me-2">Edit</button>
-                                <button class="btn btn-sm btn-outline-danger">Delete</button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(taskElement);
-                
-            } else {
-                // Display existing tasks
-                container.innerHTML = '';
-                myTasks.forEach(task => {
-                    const taskElement = document.createElement('div');
-                    taskElement.className = 'card mb-3';
-                    taskElement.innerHTML = `
-                        <div class="card-body">
-                            <h5 class="card-title">${task.title}</h5>
-                            <p class="card-text">${task.description}</p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <small class="text-muted">$${task.payAmount} • ${task.timeWindow}</small>
-                                <div>
-                                    <button class="btn btn-sm btn-outline-primary me-2">Edit</button>
-                                    <button class="btn btn-sm btn-outline-danger">Delete</button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    container.appendChild(taskElement);
-                });
-            }
-        }
-
-        // Simple test to check if the issue is with the app logic
-        function testAppLogic() {
-            console.log('=== TESTING APP LOGIC ===');
-            
-            // Check if app exists
-            if (!window.app) {
-                console.error('App not found!');
-                return;
-            }
-            
-            // Check current user
-            console.log('App current user:', window.app.currentUser);
-            console.log('localStorage current user:', localStorage.getItem('getitdone_current_user'));
-            
-            // Check if loadMyStuff is working
-            console.log('Calling loadMyStuff...');
-            window.app.loadMyStuff();
-            
-            // Check if loadMyPostedTasks is working
-            console.log('Calling loadMyPostedTasks...');
-            window.app.loadMyPostedTasks();
-        }
-
-        // Simple comprehensive test
-        function simpleTest() {
-            console.log('=== SIMPLE COMPREHENSIVE TEST ===');
-            
-            // 1. Check if we're logged in
-            const currentUser = localStorage.getItem('getitdone_current_user');
-            console.log('1. Current user:', currentUser);
-            
-            if (!currentUser) {
-                alert('❌ NOT LOGGED IN! Please log in first.');
-                return;
-            }
-            
-            // 2. Check if app exists
-            if (!window.app) {
-                alert('❌ APP NOT FOUND! Something is wrong with the app initialization.');
-                return;
-            }
-            
-            // 3. Check localStorage tasks
-            const allTasks = JSON.parse(localStorage.getItem('getitdone_tasks') || '[]');
-            console.log('2. All tasks in localStorage:', allTasks.length);
-            
-            // 4. Check my tasks
-            const myTasks = allTasks.filter(task => task.posterEmail === currentUser);
-            console.log('3. My tasks:', myTasks.length);
-            
-            // 5. Check container
-            const container = document.getElementById('my-posted-tasks');
-            console.log('4. Container found:', !!container);
-            
-            // 6. Try to display tasks
-            if (myTasks.length > 0) {
-                console.log('5. Displaying tasks...');
-                container.innerHTML = '';
-                myTasks.forEach(task => {
-                    const taskElement = document.createElement('div');
-                    taskElement.className = 'card mb-3';
-                    taskElement.innerHTML = `
-                        <div class="card-body">
-                            <h5 class="card-title">${task.title}</h5>
-                            <p class="card-text">${task.description}</p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <small class="text-muted">$${task.payAmount} • ${task.timeWindow}</small>
-                                <div>
-                                    <button class="btn btn-sm btn-outline-primary me-2">Edit</button>
-                                    <button class="btn btn-sm btn-outline-danger">Delete</button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    container.appendChild(taskElement);
-                });
-                alert(`✅ SUCCESS! Found and displayed ${myTasks.length} tasks.`);
-            } else {
-                console.log('5. No tasks found, creating test task...');
-                const testTask = {
-                    id: Date.now(),
-                    title: 'Test Task - ' + new Date().toLocaleTimeString(),
-                    description: 'This is a test task created by the simple test',
-                    tags: ['test'],
-                    payType: 'flat',
-                    payAmount: 25,
-                    date: new Date().toISOString().split('T')[0],
-                    timeWindow: 'Morning',
-                    jobType: 'local',
-                    college: 'University of Alabama - Tuscaloosa',
-                    locationType: 'Campus',
-                    locationName: 'Test Location',
-                    address: '123 Test St',
-                    coordinates: null,
-                    posterName: 'Test User',
-                    posterEmail: currentUser,
-                    status: 'open',
-                    createdAt: new Date().toISOString()
-                };
-                
-                allTasks.push(testTask);
-                localStorage.setItem('getitdone_tasks', JSON.stringify(allTasks));
-                
-                // Display the test task
-                container.innerHTML = '';
-                const taskElement = document.createElement('div');
-                taskElement.className = 'card mb-3';
-                taskElement.innerHTML = `
-                    <div class="card-body">
-                        <h5 class="card-title">${testTask.title}</h5>
-                        <p class="card-text">${testTask.description}</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                            <small class="text-muted">$${testTask.payAmount} • ${testTask.timeWindow}</small>
-                            <div>
-                                <button class="btn btn-sm btn-outline-primary me-2">Edit</button>
-                                <button class="btn btn-sm btn-outline-danger">Delete</button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(taskElement);
-                
-                alert('✅ SUCCESS! Created and displayed a test task.');
-            }
-        }
-
-        // Check localStorage directly
-        function checkLocalStorage() {
-            console.log('=== CHECKING LOCALSTORAGE ===');
-            console.log('All localStorage keys:', Object.keys(localStorage));
-            
-            // Check all possible user keys
-            console.log('getitdone_current_user:', localStorage.getItem('getitdone_current_user'));
-            console.log('current_user:', localStorage.getItem('current_user'));
-            console.log('user_data:', localStorage.getItem('user_data'));
-            
-            // Check all possible task keys
-            console.log('getitdone_tasks:', localStorage.getItem('getitdone_tasks'));
-            console.log('posted_tasks:', localStorage.getItem('posted_tasks'));
-            
-            // Parse and show tasks
-            const allTasks = JSON.parse(localStorage.getItem('getitdone_tasks') || '[]');
-            console.log('Parsed getitdone_tasks:', allTasks);
-            console.log('Number of tasks:', allTasks.length);
-            
-            // Check current user
-            const currentUser = localStorage.getItem('getitdone_current_user');
-            console.log('Current user:', currentUser);
-            
-            if (currentUser && allTasks.length > 0) {
-                const myTasks = allTasks.filter(task => task.posterEmail === currentUser);
-                console.log('My tasks:', myTasks);
-                console.log('Number of my tasks:', myTasks.length);
-            }
-        }
-
-        // Test database connection
-        async function testDatabase() {
-            console.log('=== TESTING DATABASE CONNECTION ===');
-            try {
-                const response = await fetch('/api/tasks.php');
-                console.log('Database response status:', response.status);
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('Database response:', data);
-                    console.log('Number of tasks in database:', data.tasks ? data.tasks.length : 0);
-                    
-                    const currentUser = localStorage.getItem('getitdone_current_user');
-                    if (currentUser && data.tasks) {
-                        const myTasks = data.tasks.filter(task => task.posterEmail === currentUser);
-                        console.log('My tasks in database:', myTasks);
-                        console.log('Number of my tasks in database:', myTasks.length);
-                    }
-                } else {
-                    console.error('Database connection failed:', response.status, response.statusText);
-                }
-            } catch (error) {
-                console.error('Database connection error:', error);
-            }
-        }
     </script>
 </body>
 </html>
-

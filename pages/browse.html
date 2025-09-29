@@ -10,7 +10,7 @@
     <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="../assets/styles/styles.css">
 </head>
 <body>
     <!-- Fiverr-Style Header -->
@@ -501,6 +501,67 @@
                             </select>
                         </div>
 
+                        <!-- University -->
+                        <div class="filter-section">
+                            <label class="filter-title">University</label>
+                            <select class="form-select" id="university-filter">
+                                <option value="">All Universities</option>
+                                <option value="University of Alabama">University of Alabama</option>
+                                <option value="Auburn University">Auburn University</option>
+                                <option value="University of Alabama at Birmingham">University of Alabama at Birmingham</option>
+                                <option value="University of Alabama in Huntsville">University of Alabama in Huntsville</option>
+                                <option value="Troy University">Troy University</option>
+                                <option value="Jacksonville State University">Jacksonville State University</option>
+                                <option value="University of Montevallo">University of Montevallo</option>
+                                <option value="Samford University">Samford University</option>
+                                <option value="Birmingham-Southern College">Birmingham-Southern College</option>
+                                <option value="Huntingdon College">Huntingdon College</option>
+                                <option value="Spring Hill College">Spring Hill College</option>
+                                <option value="University of West Alabama">University of West Alabama</option>
+                                <option value="Alabama State University">Alabama State University</option>
+                                <option value="Alabama A&M University">Alabama A&M University</option>
+                                <option value="University of North Alabama">University of North Alabama</option>
+                                <option value="Faulkner University">Faulkner University</option>
+                                <option value="Miles College">Miles College</option>
+                                <option value="Stillman College">Stillman College</option>
+                                <option value="Tuskegee University">Tuskegee University</option>
+                                <option value="Talladega College">Talladega College</option>
+                                <option value="Concordia College Alabama">Concordia College Alabama</option>
+                                <option value="Judson College">Judson College</option>
+                                <option value="Athens State University">Athens State University</option>
+                                <option value="Vanderbilt University">Vanderbilt University</option>
+                                <option value="University of Tennessee">University of Tennessee</option>
+                                <option value="University of Memphis">University of Memphis</option>
+                                <option value="East Tennessee State University">East Tennessee State University</option>
+                                <option value="Middle Tennessee State University">Middle Tennessee State University</option>
+                                <option value="Austin Peay State University">Austin Peay State University</option>
+                                <option value="Tennessee Technological University">Tennessee Technological University</option>
+                                <option value="University of Tennessee at Martin">University of Tennessee at Martin</option>
+                                <option value="University of Tennessee at Chattanooga">University of Tennessee at Chattanooga</option>
+                                <option value="Belmont University">Belmont University</option>
+                                <option value="Lipscomb University">Lipscomb University</option>
+                                <option value="Trevecca Nazarene University">Trevecca Nazarene University</option>
+                                <option value="Cumberland University">Cumberland University</option>
+                                <option value="Union University">Union University</option>
+                                <option value="Rhodes College">Rhodes College</option>
+                                <option value="Sewanee: The University of the South">Sewanee: The University of the South</option>
+                                <option value="Fisk University">Fisk University</option>
+                                <option value="Tennessee State University">Tennessee State University</option>
+                                <option value="Christian Brothers University">Christian Brothers University</option>
+                                <option value="Southwestern College">Southwestern College</option>
+                                <option value="Milligan University">Milligan University</option>
+                                <option value="King University">King University</option>
+                                <option value="Tusculum University">Tusculum University</option>
+                                <option value="Carson-Newman University">Carson-Newman University</option>
+                                <option value="Lee University">Lee University</option>
+                                <option value="Bryan College">Bryan College</option>
+                                <option value="Southern Adventist University">Southern Adventist University</option>
+                                <option value="Tennessee Wesleyan University">Tennessee Wesleyan University</option>
+                                <option value="Bethel University">Bethel University</option>
+                                <option value="Freed-Hardeman University">Freed-Hardeman University</option>
+                            </select>
+                        </div>
+
                         <!-- Location -->
                         <div class="filter-section">
                             <label class="filter-title">Location</label>
@@ -690,8 +751,8 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <!-- Custom JS -->
-    <script src="data.js"></script>
-    <script src="app.js"></script>
+    <script src="../assets/scripts/data.js"></script>
+    <script src="../assets/scripts/app.js"></script>
     
     <script>
         // Category filtering functionality
@@ -752,9 +813,22 @@
             window.location.href = url.toString();
         }
 
+        // University filtering
+        function applyUniversityFilter() {
+            const universityFilter = document.getElementById('university-filter');
+            if (universityFilter) {
+                universityFilter.addEventListener('change', function() {
+                    if (window.app) {
+                        window.app.filterTasksByUniversity(this.value);
+                    }
+                });
+            }
+        }
+
         // Initialize category filtering when page loads
         document.addEventListener('DOMContentLoaded', function() {
             applyCategoryFilter();
+            applyUniversityFilter();
             
             // Initialize the browse page
             if (window.app) {

@@ -32,9 +32,27 @@ class GetItDoneApp {
         // Initialize common functionality
         this.initCommonFeatures();
         
-        // Initialize new features
-        this.initNotificationSystem();
-        this.initMessagingSystem();
+        // Initialize new features if user is logged in
+        if (this.currentUser && this.currentUserData) {
+            this.initNotificationSystem();
+            this.initMessagingSystem();
+        }
+        
+        // Also load notifications immediately if user is logged in (for existing sessions)
+        setTimeout(() => {
+            if (this.currentUser && this.currentUserData) {
+                this.loadNotifications();
+                this.loadConversations();
+            }
+        }, 1000);
+        
+        // Force load notifications after a longer delay to ensure everything is ready
+        setTimeout(() => {
+            if (this.currentUser && this.currentUserData) {
+                this.loadNotifications();
+                this.loadConversations();
+            }
+        }, 3000);
     }
 
     getCurrentPage() {
@@ -47,7 +65,8 @@ class GetItDoneApp {
     }
 
     getCurrentUser() {
-        return localStorage.getItem('getitdone_current_user') || null;
+        const email = localStorage.getItem('getitdone_current_user');
+        return email ? email.trim().toLowerCase() : null; // Ensure consistent format
     }
 
     getCurrentUserData() {
@@ -60,10 +79,15 @@ class GetItDoneApp {
 
 
     setCurrentUser(email) {
-        localStorage.setItem('getitdone_current_user', email);
-        this.currentUser = email;
+        const normalizedEmail = email.trim().toLowerCase(); // Ensure consistent format
+        localStorage.setItem('getitdone_current_user', normalizedEmail);
+        this.currentUser = normalizedEmail;
         this.currentUserData = this.getCurrentUserData();
         this.updateNavigation();
+        
+        // Initialize notification and messaging systems after login
+        this.initNotificationSystem();
+        this.initMessagingSystem();
         
         // Update post page if we're on it
         if (this.getCurrentPage() === 'post') {
@@ -76,6 +100,15 @@ class GetItDoneApp {
         this.currentUser = null;
         this.currentUserData = null;
         this.updateNavigation();
+        
+        // Clear notification and message badges
+        const badgeIds = ['notification-badge', 'header-notification-badge', 'notification-badge-nav', 'message-badge', 'header-message-badge'];
+        badgeIds.forEach(badgeId => {
+            const badge = document.getElementById(badgeId);
+            if (badge) {
+                badge.style.display = 'none';
+            }
+        });
         
         // Update post page if we're on it
         if (this.getCurrentPage() === 'post') {
@@ -163,6 +196,34 @@ class GetItDoneApp {
         this.applyUrlFilters();
     }
 
+    // University filtering
+    filterTasksByUniversity(university) {
+        const tasks = dataManager.getAllTasks().filter(task => task.status !== 'completed');
+        const container = document.getElementById('tasks-container');
+        if (!container) return;
+
+        let filteredTasks = tasks;
+        
+        if (university) {
+            filteredTasks = tasks.filter(task => {
+                const poster = dataManager.getUserByEmail(task.posterEmail);
+                return poster && poster.university === university;
+            });
+        }
+
+        // Clear container and display filtered tasks
+        container.innerHTML = '';
+        if (filteredTasks.length === 0) {
+            container.innerHTML = '<div class="col-12 text-center py-5"><p class="text-white">No tasks found for this university.</p></div>';
+            return;
+        }
+
+        filteredTasks.forEach(task => {
+            const taskCard = this.createTaskCard(task);
+            container.appendChild(taskCard);
+        });
+    }
+
     loadAllTasks(filters = {}) {
         const container = document.getElementById('tasks-container');
         if (!container) {
@@ -170,7 +231,10 @@ class GetItDoneApp {
         }
 
         const searchQuery = document.getElementById('search-input')?.value || '';
-        const tasks = dataManager.searchTasks(searchQuery, filters);
+        let tasks = dataManager.searchTasks(searchQuery, filters);
+        
+        // Filter out completed tasks from browse page
+        tasks = tasks.filter(task => task.status !== 'completed');
         
         const sortBy = document.getElementById('sort-select')?.value || 'newest';
         const sortedTasks = dataManager.sortTasks(tasks, sortBy);
@@ -584,6 +648,21 @@ class GetItDoneApp {
             });
         }
 
+        // Populate payment information
+        const paymentElements = {
+            'task-total-amount': task.payAmount.toFixed(2),
+            'task-platform-fee': (task.platformFee || Math.round(task.payAmount * 0.05 * 100) / 100).toFixed(2),
+            'task-helper-payment': (task.helperPayment || Math.round((task.payAmount - Math.round(task.payAmount * 0.05 * 100) / 100) * 100) / 100).toFixed(2),
+            'task-payment-method': task.paymentMethod === 'online' ? 'Online Payment' : 'Cash Payment'
+        };
+
+        Object.entries(paymentElements).forEach(([id, value]) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = value;
+            }
+        });
+
         // Show/hide apply button based on status and user
         const applyButton = document.getElementById('apply-button');
         const completionButton = document.getElementById('completion-button');
@@ -596,14 +675,28 @@ class GetItDoneApp {
             }
         }
 
-        // Show completion button for assigned tasks where user is the helper
+        // Show completion button for assigned tasks where user is the helper OR poster
         if (completionButton) {
             const applications = dataManager.getApplicationsByTaskId(task.id);
             const userApplication = applications.find(app => app.helperEmail === this.currentUser && app.status === 'accepted');
             
+            // Show for helpers who were accepted and task is assigned
             if (userApplication && task.status === 'assigned') {
                 completionButton.style.display = 'block';
+                completionButton.innerHTML = '<i class="bi bi-check-circle me-2"></i>Mark as Completed';
                 completionButton.onclick = () => this.showTaskCompletionModal(task.id);
+            }
+            // Show for posters when task is assigned
+            else if (this.currentUser === task.posterEmail && task.status === 'assigned') {
+                completionButton.style.display = 'block';
+                completionButton.innerHTML = '<i class="bi bi-check-circle me-2"></i>Mark as Completed';
+                completionButton.onclick = () => {
+                    if (confirm('Mark this task as completed? This will finalize the task and payment.')) {
+                        dataManager.updateTask(task.id, { status: 'completed' });
+                        this.showSuccess('Task marked as completed!');
+                        setTimeout(() => window.location.reload(), 1000);
+                    }
+                };
             } else {
                 completionButton.style.display = 'none';
             }
@@ -635,6 +728,79 @@ class GetItDoneApp {
         
         // Add modal event listeners to update page state when modals are closed
         this.setupModalEventListeners();
+        
+        // Check if this is an edit operation and populate form
+        this.populateEditForm();
+    }
+
+    // Populate form for editing
+    populateEditForm() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const editTaskId = urlParams.get('edit');
+        const taskData = urlParams.get('data');
+        
+        if (editTaskId && taskData) {
+            try {
+                const task = JSON.parse(decodeURIComponent(taskData));
+                
+                // Populate form fields
+                const form = document.getElementById('post-task-form');
+                if (form) {
+                    form.querySelector('#task-title').value = task.title || '';
+                    form.querySelector('#task-description').value = task.description || '';
+                    form.querySelector('#pay-amount').value = task.payAmount || '';
+                    form.querySelector('#task-date').value = task.date || '';
+                    form.querySelector('#time-window').value = task.timeWindow || '';
+                    form.querySelector('#location-name').value = task.locationName || '';
+                    form.querySelector('#address').value = task.address || '';
+                    form.querySelector('#college').value = task.college || '';
+                    
+                    // Set pay type
+                    const payTypeRadio = form.querySelector(`input[name="payType"][value="${task.payType}"]`);
+                    if (payTypeRadio) payTypeRadio.checked = true;
+                    
+                    // Set job type
+                    const jobTypeRadio = form.querySelector(`input[name="jobType"][value="${task.jobType}"]`);
+                    if (jobTypeRadio) jobTypeRadio.checked = true;
+                    
+                    // Set payment method
+                    const paymentMethodSelect = form.querySelector('#payment-method');
+                    if (paymentMethodSelect && task.paymentMethod) {
+                        paymentMethodSelect.value = task.paymentMethod;
+                    }
+                    
+                    // Populate payment card info if it exists
+                    if (task.paymentCardInfo) {
+                        form.querySelector('#payment-card-number').value = task.paymentCardInfo.cardNumber || '';
+                        form.querySelector('#payment-card-expiry').value = task.paymentCardInfo.cardExpiry || '';
+                        form.querySelector('#payment-card-cvv').value = task.paymentCardInfo.cardCvv || '';
+                        form.querySelector('#payment-card-name').value = task.paymentCardInfo.cardName || '';
+                    }
+                    
+                    // Set tags
+                    if (task.tags) {
+                        task.tags.forEach(tag => {
+                            const checkbox = form.querySelector(`input[value="${tag}"]`);
+                            if (checkbox) checkbox.checked = true;
+                        });
+                    }
+                    
+                    // Update page title
+                    document.querySelector('h1').textContent = 'Edit Task';
+                    
+                    // Update submit button
+                    const submitBtn = form.querySelector('button[type="submit"]');
+                    if (submitBtn) {
+                        submitBtn.textContent = 'Update Task';
+                        submitBtn.classList.remove('btn-primary');
+                        submitBtn.classList.add('btn-warning');
+                    }
+                }
+            } catch (error) {
+                console.error('Error parsing task data for editing:', error);
+                this.showError('Error loading task data for editing');
+            }
+        }
     }
 
     setupModalEventListeners() {
@@ -668,42 +834,30 @@ class GetItDoneApp {
         this.currentUser = this.getCurrentUser();
         this.currentUserData = this.getCurrentUserData();
         
-        console.log('updatePostPageUserInfo - Current user:', this.currentUser);
-        console.log('updatePostPageUserInfo - Current user data:', this.currentUserData);
-        
         if (this.currentUser && this.currentUserData) {
             // User is logged in - show user info, hide login prompt and overlay
-            console.log('User is logged in - hiding login elements');
             if (loginPromptSection) {
                 loginPromptSection.style.display = 'none';
-                console.log('Login prompt hidden');
             }
             if (userInfoSection) {
                 userInfoSection.style.display = 'block';
-                console.log('User info shown');
             }
             if (loginOverlay) {
                 loginOverlay.style.display = 'none';
-                console.log('Login overlay hidden');
             }
             if (userInfoNotice) {
                 userInfoNotice.innerHTML = `<strong>${this.currentUserData.name}</strong> (${this.currentUser})`;
-                console.log('User info notice updated');
             }
         } else {
             // User is not logged in - show login prompt and overlay, hide user info
-            console.log('User is not logged in - showing login elements');
             if (loginPromptSection) {
                 loginPromptSection.style.display = 'block';
-                console.log('Login prompt shown');
             }
             if (userInfoSection) {
                 userInfoSection.style.display = 'none';
-                console.log('User info hidden');
             }
             if (loginOverlay) {
                 loginOverlay.style.display = 'flex';
-                console.log('Login overlay shown');
             }
         }
         
@@ -729,15 +883,6 @@ class GetItDoneApp {
         };
         
         form.addEventListener('submit', this.handleFormSubmit);
-
-        // ALSO add direct click handler to the submit button
-        const submitButton = document.getElementById('post-task-button');
-        if (submitButton) {
-            submitButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.handlePostTask(form);
-            });
-        }
 
         // Add interaction handlers for guests
         this.setupGuestFormInteraction();
@@ -944,6 +1089,11 @@ class GetItDoneApp {
 
         const formData = new FormData(form);
         
+        // Check if this is an edit operation
+        const urlParams = new URLSearchParams(window.location.search);
+        const editTaskId = urlParams.get('edit');
+        const isEdit = !!editTaskId;
+        
         // Get selected tags
         const selectedTags = [];
         const checkboxes = form.querySelectorAll('input[type="checkbox"]:checked');
@@ -966,7 +1116,15 @@ class GetItDoneApp {
             address: formData.get('address') || '',
             coordinates: null, // Will be set if needed for local jobs
             posterName: this.currentUserData.name,
-            posterEmail: this.currentUser
+            posterEmail: this.currentUser.trim().toLowerCase(), // Ensure consistent format
+            paymentMethod: formData.get('paymentMethod'),
+            // Include payment card info for online payments
+            paymentCardInfo: formData.get('paymentMethod') === 'online' ? {
+                cardNumber: formData.get('paymentCardNumber'),
+                cardExpiry: formData.get('paymentCardExpiry'),
+                cardCvv: formData.get('paymentCardCvv'),
+                cardName: formData.get('paymentCardName')
+            } : null
         };
 
         // Validate required fields
@@ -975,19 +1133,31 @@ class GetItDoneApp {
         }
 
         try {
-            // Add task
-            const newTask = dataManager.addTask(taskData);
-
-            // Show success message
-            this.showSuccess('Task posted successfully!');
+            let task;
             
-            // Redirect to browse page to see the posted task
+            if (isEdit) {
+                // Update existing task
+                task = dataManager.updateTask(editTaskId, taskData);
+                if (task) {
+                    this.showSuccess('Task updated successfully!');
+                } else {
+                    this.showError('Failed to update task');
+                    return;
+                }
+            } else {
+                // Create new task
+                task = dataManager.addTask(taskData);
+                this.showSuccess('Task posted successfully!');
+            }
+            
+            // Redirect to browse page to see the task
             setTimeout(() => {
                 window.location.href = 'browse.html';
             }, 1500);
+
         } catch (error) {
-            console.error('Error adding task:', error);
-            this.showError('Error posting task: ' + error.message);
+            console.error('Error processing task:', error);
+            this.showError('Error processing task: ' + error.message);
         }
     }
 
@@ -1042,14 +1212,19 @@ class GetItDoneApp {
     }
 
     loadMyStuff() {
-        console.log('loadMyStuff called, current user:', this.currentUser);
         if (!this.currentUser) {
-            console.log('No user logged in, showing login prompt');
             this.showLoginPrompt();
             return;
         }
-
-        console.log('Loading posted tasks and applications...');
+        
+        // Show the dashboard content
+        const dashboardContent = document.getElementById('dashboard-content');
+        const myStuffContent = document.getElementById('my-stuff-content');
+        if (dashboardContent && myStuffContent) {
+            myStuffContent.style.display = 'none';
+            dashboardContent.style.display = 'block';
+        }
+        
         this.loadMyPostedTasks();
         this.loadMyApplications();
     }
@@ -1069,56 +1244,42 @@ class GetItDoneApp {
     }
 
     loadMyPostedTasks() {
-        console.log('=== LOAD MY POSTED TASKS ===');
-        console.log('loadMyPostedTasks called');
-        
         const container = document.getElementById('my-posted-tasks');
         if (!container) {
-            console.error('my-posted-tasks container not found');
             return;
         }
         
         // Force refresh current user data
         this.currentUser = this.getCurrentUser();
-        console.log('Current user email (refreshed):', this.currentUser);
-        console.log('Current user type:', typeof this.currentUser);
         
         const allTasks = dataManager.getAllTasks();
-        console.log('All tasks from localStorage:', allTasks);
-        console.log('Number of total tasks:', allTasks.length);
         
-        // Check each task's posterEmail
-        allTasks.forEach((task, index) => {
-            console.log(`Task ${index}:`, {
-                id: task.id,
-                title: task.title,
-                posterEmail: task.posterEmail,
-                posterEmailType: typeof task.posterEmail,
-                matches: task.posterEmail === this.currentUser,
-                exactMatch: task.posterEmail === this.currentUser,
-                includesMatch: task.posterEmail && task.posterEmail.includes(this.currentUser)
-            });
+        // Improved task filtering with multiple strategies
+        const myTasks = allTasks.filter(task => {
+            if (!task.posterEmail || !this.currentUser) return false;
+            
+            // Strategy 1: Exact match
+            if (task.posterEmail === this.currentUser) return true;
+            
+            // Strategy 2: Normalized match (handle case differences)
+            const taskEmail = task.posterEmail.trim().toLowerCase();
+            const currentEmail = this.currentUser.trim().toLowerCase();
+            if (taskEmail === currentEmail) return true;
+            
+            return false;
         });
-        
-        const myTasks = allTasks.filter(task => task.posterEmail === this.currentUser);
-        console.log('Filtered my tasks:', myTasks);
-        console.log('Number of my tasks:', myTasks.length);
 
         container.innerHTML = '';
 
         if (myTasks.length === 0) {
-            console.log('No tasks found for user');
             container.innerHTML = '<p class="text-muted">You haven\'t posted any tasks yet.</p>';
             return;
         }
-
-        console.log('Found', myTasks.length, 'tasks for user');
 
         // Sort tasks by creation date (newest first)
         myTasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
         myTasks.forEach(task => {
-            console.log('Creating element for task:', task.title);
             const taskElement = this.createMyTaskElement(task);
             container.appendChild(taskElement);
         });
@@ -1243,6 +1404,22 @@ class GetItDoneApp {
                         <small class="task-location">
                             <i class="bi ${task.jobType === 'remote' ? 'bi-laptop' : 'bi-geo-alt'} me-1"></i>
                             ${task.jobType === 'remote' ? 'Remote' : (task.college ? task.college.split(' - ')[0] : task.locationName)}
+                        </small>
+                    </div>
+                    <div class="mb-2">
+                        <small class="text-muted">
+                            <i class="bi bi-building me-1"></i>
+                            ${(() => {
+                                const poster = dataManager.getUserByEmail(task.posterEmail);
+                                return poster ? poster.university : 'University not specified';
+                            })()}
+                        </small>
+                    </div>
+                    <div class="mb-2">
+                        <small class="text-info">
+                            <i class="bi bi-credit-card me-1"></i>
+                            ${task.paymentMethod === 'online' ? 'Online Payment' : 'Cash Payment'}
+                            ${task.paymentMethod === 'online' ? ` • Helper gets: $${(task.helperPayment || (task.payAmount * 0.95).toFixed(2))}` : ''}
                         </small>
                     </div>
                     <div class="mb-3">
@@ -1512,7 +1689,7 @@ class GetItDoneApp {
                 }
             }, 300);
         } else {
-            this.showError('Invalid email or password');
+            this.showError('Invalid email or password. Please check your credentials or create a new account.');
         }
     }
 
@@ -1527,13 +1704,7 @@ class GetItDoneApp {
 
         // Validate required fields
         if (!userData.email || !userData.name || !userData.password) {
-            this.showError('Please fill in all required fields');
-            return;
-        }
-
-        // Check if user already exists
-        if (dataManager.getUserByEmail(userData.email)) {
-            this.showError('An account with this email already exists');
+            this.showError('Please fill in all required fields (Name, Email, Password)');
             return;
         }
 
@@ -1550,22 +1721,35 @@ class GetItDoneApp {
             return;
         }
 
-        // Add user
-        const newUser = dataManager.addUser(userData);
-        this.setCurrentUser(newUser.email);
-        
-        const modal = bootstrap.Modal.getInstance(document.getElementById('register-modal'));
-        modal.hide();
-        this.showSuccess(`Welcome to GetItDone, ${newUser.name}!`);
-        form.reset();
-        
-        // Force update post page state after modal is closed
-        setTimeout(() => {
-            if (this.getCurrentPage() === 'post') {
-                this.updatePostPageUserInfo();
-                this.updatePostFormState();
-            }
-        }, 300);
+        // Check if user already exists
+        if (dataManager.getUserByEmail(userData.email)) {
+            this.showError('An account with this email already exists. Please try logging in instead.');
+            return;
+        }
+
+        try {
+            // Add user
+            const newUser = dataManager.addUser(userData);
+            
+            // Automatically log in the new user
+            this.setCurrentUser(newUser.email);
+            
+            const modal = bootstrap.Modal.getInstance(document.getElementById('register-modal'));
+            modal.hide();
+            this.showSuccess(`Welcome to GetItDone, ${newUser.name}! Your account has been created and you are now logged in.`);
+            form.reset();
+            
+            // Force update post page state after modal is closed
+            setTimeout(() => {
+                if (this.getCurrentPage() === 'post') {
+                    this.updatePostPageUserInfo();
+                    this.updatePostFormState();
+                }
+            }, 300);
+        } catch (error) {
+            this.showError('Error creating account. Please try again.');
+            console.error('Registration error:', error);
+        }
     }
 
     setupApplyModal() {
@@ -1658,32 +1842,53 @@ class GetItDoneApp {
 
     // Notification System
     initNotificationSystem() {
-        this.loadNotifications();
-        // Refresh notifications every 30 seconds
-        setInterval(() => {
+        // Only initialize if user is logged in
+        if (this.currentUser && this.currentUserData) {
             this.loadNotifications();
-        }, 30000);
+            // Refresh notifications every 30 seconds
+            setInterval(() => {
+                if (this.currentUser && this.currentUserData) {
+                    this.loadNotifications();
+                }
+            }, 30000);
+        }
     }
 
     loadNotifications() {
-        if (!this.currentUserData) return;
+        if (!this.currentUserData) {
+            console.log('loadNotifications: No currentUserData');
+            return;
+        }
 
         const notifications = dataManager.getNotificationsForUser(this.currentUserData.id);
         const unreadCount = dataManager.getUnreadNotificationCount(this.currentUserData.id);
+        
+        console.log('loadNotifications: User ID:', this.currentUserData.id);
+        console.log('loadNotifications: Notifications:', notifications);
+        console.log('loadNotifications: Unread Count:', unreadCount);
 
-        // Update notification badge
-        const badge = document.getElementById('notification-badge');
-        if (badge) {
-            if (unreadCount > 0) {
-                badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
-                badge.style.display = 'block';
-            } else {
-                badge.style.display = 'none';
+        // Update notification badges (check multiple IDs)
+        const badgeIds = ['notification-badge', 'header-notification-badge', 'notification-badge-nav'];
+        badgeIds.forEach(badgeId => {
+            const badge = document.getElementById(badgeId);
+            if (badge) {
+                if (unreadCount > 0) {
+                    badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+                    badge.style.display = 'block';
+                } else {
+                    badge.style.display = 'none';
+                }
             }
-        }
+        });
 
-        // Update notifications list
-        const notificationsList = document.getElementById('notifications-list');
+        // Update notifications list (check multiple IDs)
+        const notificationsListIds = ['notifications-list', 'notifications-modal-list'];
+        let notificationsList = null;
+        notificationsListIds.forEach(listId => {
+            if (!notificationsList) {
+                notificationsList = document.getElementById(listId);
+            }
+        });
         if (notificationsList) {
             notificationsList.innerHTML = '';
             
@@ -1742,21 +1947,31 @@ class GetItDoneApp {
     }
 
     loadConversations() {
-        if (!this.currentUser) return;
+        if (!this.currentUser) {
+            console.log('loadConversations: No currentUser');
+            return;
+        }
 
         const conversations = dataManager.getConversationsForUser(this.currentUser);
         const totalUnread = conversations.reduce((sum, conv) => sum + conv.unreadCount, 0);
+        
+        console.log('loadConversations: User:', this.currentUser);
+        console.log('loadConversations: Conversations:', conversations);
+        console.log('loadConversations: Total Unread:', totalUnread);
 
-        // Update message badge
-        const badge = document.getElementById('message-badge');
-        if (badge) {
-            if (totalUnread > 0) {
-                badge.textContent = totalUnread > 99 ? '99+' : totalUnread;
-                badge.style.display = 'block';
-            } else {
-                badge.style.display = 'none';
+        // Update message badges (check multiple IDs)
+        const messageBadgeIds = ['message-badge', 'header-message-badge'];
+        messageBadgeIds.forEach(badgeId => {
+            const badge = document.getElementById(badgeId);
+            if (badge) {
+                if (totalUnread > 0) {
+                    badge.textContent = totalUnread > 99 ? '99+' : totalUnread;
+                    badge.style.display = 'block';
+                } else {
+                    badge.style.display = 'none';
+                }
             }
-        }
+        });
 
         // Update conversations list
         const conversationsList = document.getElementById('conversations-list');
@@ -2098,6 +2313,7 @@ class GetItDoneApp {
             hour12: true 
         });
     }
+    
 }
 
 // Global functions for HTML onclick handlers
@@ -2177,9 +2393,9 @@ function showMessagesModal() {
 }
 
 function markAllNotificationsRead() {
-    if (app.currentUserData) {
-        dataManager.markAllNotificationsAsRead(app.currentUserData.id);
-        app.loadNotifications();
+    if (window.app && window.app.currentUserData) {
+        dataManager.markAllNotificationsAsRead(window.app.currentUserData.id);
+        window.app.loadNotifications();
     }
 }
 
@@ -2270,20 +2486,81 @@ function openMessagesModal() {
 
 // Initialize app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM loaded, initializing app...');
     window.app = new GetItDoneApp();
     
     // Initialize specific pages
     const currentPage = window.app.getCurrentPage();
-    console.log('Current page:', currentPage);
     
     if (currentPage === 'post') {
-        console.log('Initializing post page...');
         window.app.initPostPage();
     } else if (currentPage === 'my-stuff') {
-        console.log('Initializing my stuff page...');
         window.app.initMyStuffPage();
     }
+    
+    // Debug function to test notification and messaging systems
+    window.debugSystems = function() {
+        console.log('=== DEBUG SYSTEMS ===');
+        console.log('Current User:', window.app.currentUser);
+        console.log('Current User Data:', window.app.currentUserData);
+        
+        if (window.app.currentUser && window.app.currentUserData) {
+            console.log('Loading notifications...');
+            window.app.loadNotifications();
+            console.log('Loading conversations...');
+            window.app.loadConversations();
+        } else {
+            console.log('No user logged in');
+        }
+    };
+    
+    // Manual trigger for notifications (for testing)
+    window.forceLoadNotifications = function() {
+        if (window.app && window.app.currentUser && window.app.currentUserData) {
+            console.log('Force loading notifications...');
+            window.app.loadNotifications();
+            window.app.loadConversations();
+        }
+    };
+    
+    // Function to refresh sample data (for testing)
+    window.refreshSampleData = function() {
+        console.log('Refreshing sample data...');
+        // Clear existing data
+        localStorage.removeItem('getitdone_users');
+        localStorage.removeItem('getitdone_tasks');
+        localStorage.removeItem('getitdone_messages');
+        localStorage.removeItem('getitdone_notifications');
+        localStorage.removeItem('getitdone_applications');
+        
+        // Reinitialize data
+        dataManager.initializeData();
+        
+        // Reload current user data
+        if (window.app.currentUser) {
+            window.app.currentUserData = window.app.getCurrentUserData();
+            window.app.loadNotifications();
+            window.app.loadConversations();
+        }
+        
+        console.log('Sample data refreshed!');
+        
+        // Show available users
+        const users = dataManager.getAllUsers();
+        console.log('Available users:', users.length);
+        users.forEach(user => {
+            console.log(`- ${user.name} (${user.email}) - password: ${user.password}`);
+        });
+    };
+    
+    // Function to create test account
+    window.createTestAccount = function() {
+        console.log('Creating test account...');
+        refreshSampleData();
+        console.log('Test account created!');
+        console.log('Test credentials:');
+        console.log('Email: test@example.com');
+        console.log('Password: test123');
+    };
     
     // Close profile dropdown when clicking outside
     document.addEventListener('click', (e) => {

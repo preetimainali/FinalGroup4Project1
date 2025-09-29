@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - GetItDone</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="../assets/styles/styles.css">
+    <style>
+        .admin-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1.5rem;
+        }
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .earnings-chart {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="display-4 mb-0">Admin Dashboard</h1>
+                    <p class="lead mb-0">GetItDone Platform Management</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <a href="index.html" class="btn btn-light">
+                        <i class="bi bi-arrow-left me-2"></i>Back to Main Site
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Platform Statistics -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="stat-card text-center">
+                    <i class="bi bi-people-fill text-primary mb-3" style="font-size: 2rem;"></i>
+                    <div class="stat-number" id="total-users">0</div>
+                    <div class="text-muted">Total Users</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card text-center">
+                    <i class="bi bi-clipboard-check text-success mb-3" style="font-size: 2rem;"></i>
+                    <div class="stat-number" id="total-tasks">0</div>
+                    <div class="text-muted">Total Tasks</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card text-center">
+                    <i class="bi bi-currency-dollar text-warning mb-3" style="font-size: 2rem;"></i>
+                    <div class="stat-number" id="total-earnings">$0.00</div>
+                    <div class="text-muted">Platform Earnings</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card text-center">
+                    <i class="bi bi-graph-up text-info mb-3" style="font-size: 2rem;"></i>
+                    <div class="stat-number" id="completion-rate">0%</div>
+                    <div class="text-muted">Completion Rate</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="row">
+            <div class="col-md-8">
+                <div class="earnings-chart">
+                    <h5 class="mb-3">Platform Earnings Breakdown</h5>
+                    <div id="earnings-breakdown">
+                        <!-- Earnings breakdown will be populated here -->
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="earnings-chart">
+                    <h5 class="mb-3">University Distribution</h5>
+                    <div id="university-stats">
+                        <!-- University stats will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Tasks -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="earnings-chart">
+                    <h5 class="mb-3">Recent Tasks</h5>
+                    <div id="recent-tasks">
+                        <!-- Recent tasks will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../assets/scripts/data.js"></script>
+    <script>
+        function loadAdminDashboard() {
+            // Load platform statistics
+            const users = dataManager.getAllUsers();
+            const tasks = dataManager.getAllTasks();
+            const earnings = dataManager.getPlatformEarnings();
+            
+            document.getElementById('total-users').textContent = users.length;
+            document.getElementById('total-tasks').textContent = tasks.length;
+            document.getElementById('total-earnings').textContent = `$${earnings.toFixed(2)}`;
+            
+            // Calculate completion rate
+            const completedTasks = tasks.filter(task => task.status === 'completed').length;
+            const completionRate = tasks.length > 0 ? ((completedTasks / tasks.length) * 100).toFixed(1) : 0;
+            document.getElementById('completion-rate').textContent = `${completionRate}%`;
+            
+            // Load earnings breakdown
+            loadEarningsBreakdown(tasks);
+            
+            // Load university statistics
+            loadUniversityStats(users);
+            
+            // Load recent tasks
+            loadRecentTasks(tasks);
+        }
+        
+        function loadEarningsBreakdown(tasks) {
+            const earningsBreakdown = document.getElementById('earnings-breakdown');
+            
+            // Calculate earnings by payment method
+            const onlineEarnings = tasks
+                .filter(task => task.paymentMethod === 'online' && task.paymentStatus === 'completed')
+                .reduce((sum, task) => sum + (task.platformFee || task.payAmount * 0.05), 0);
+            
+            const cashTasks = tasks.filter(task => task.paymentMethod === 'cash' && task.status === 'completed').length;
+            
+            earningsBreakdown.innerHTML = `
+                <div class="row">
+                    <div class="col-6">
+                        <div class="d-flex justify-content-between">
+                            <span>Online Payments:</span>
+                            <strong class="text-success">$${onlineEarnings.toFixed(2)}</strong>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="d-flex justify-content-between">
+                            <span>Cash Tasks:</span>
+                            <strong class="text-info">${cashTasks} tasks</strong>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+                <div class="row">
+                    <div class="col-12">
+                        <div class="d-flex justify-content-between">
+                            <span>Total Platform Fee (5%):</span>
+                            <strong class="text-warning">$${dataManager.getPlatformEarnings().toFixed(2)}</strong>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function loadUniversityStats(users) {
+            const universityStats = document.getElementById('university-stats');
+            const universityCounts = {};
+            
+            users.forEach(user => {
+                if (user.university) {
+                    universityCounts[user.university] = (universityCounts[user.university] || 0) + 1;
+                }
+            });
+            
+            // Sort universities by user count
+            const sortedUniversities = Object.entries(universityCounts)
+                .sort(([,a], [,b]) => b - a)
+                .slice(0, 5); // Top 5 universities
+            
+            let statsHTML = '';
+            sortedUniversities.forEach(([university, count]) => {
+                statsHTML += `
+                    <div class="d-flex justify-content-between mb-2">
+                        <small>${university}</small>
+                        <small class="text-muted">${count} users</small>
+                    </div>
+                `;
+            });
+            
+            universityStats.innerHTML = statsHTML || '<small class="text-muted">No university data available</small>';
+        }
+        
+        function loadRecentTasks(tasks) {
+            const recentTasks = document.getElementById('recent-tasks');
+            
+            // Sort tasks by creation date (newest first)
+            const sortedTasks = tasks.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 5);
+            
+            let tasksHTML = '';
+            sortedTasks.forEach(task => {
+                const poster = dataManager.getUserByEmail(task.posterEmail);
+                tasksHTML += `
+                    <div class="border-bottom pb-2 mb-2">
+                        <div class="d-flex justify-content-between">
+                            <strong>${task.title}</strong>
+                            <span class="badge bg-${task.status === 'completed' ? 'success' : task.status === 'assigned' ? 'warning' : 'primary'}">${task.status}</span>
+                        </div>
+                        <small class="text-muted">
+                            ${poster ? poster.university : 'Unknown University'} • $${task.payAmount}
+                        </small>
+                    </div>
+                `;
+            });
+            
+            recentTasks.innerHTML = tasksHTML || '<small class="text-muted">No tasks available</small>';
+        }
+        
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAdminDashboard();
+        });
+    </script>
+</body>
+</html>
