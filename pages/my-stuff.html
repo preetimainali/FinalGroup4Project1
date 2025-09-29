@@ -512,11 +512,13 @@
                         <p><strong>Status:</strong> <span class="status-badge status-${task.status}">${task.status.charAt(0).toUpperCase() + task.status.slice(1)}</span></p>
                         <p><strong>Pay:</strong> $${task.payAmount}</p>
                         <p><strong>Date:</strong> ${new Date(task.date).toLocaleDateString()}</p>
+                        ${getStatusProgress(task)}
                     </div>
                     <div class="col-md-6">
                         <p><strong>Time:</strong> ${task.timeWindow}</p>
                         <p><strong>Location:</strong> ${task.locationName}</p>
                         <p><strong>Posted:</strong> ${new Date(task.createdAt).toLocaleDateString()}</p>
+                        ${getStatusTimeline(task)}
                     </div>
                 </div>
                 <p><strong>Description:</strong> ${task.description}</p>
@@ -537,6 +539,49 @@
             // Show modal
             const modal = new bootstrap.Modal(document.getElementById('task-management-modal'));
             modal.show();
+        }
+
+        // Helper function to get status progress
+        function getStatusProgress(task) {
+            const statusInfo = dataManager.getTaskStatusInfo(task.id);
+            if (!statusInfo) return '';
+
+            const progress = Math.round((statusInfo.timeline.filter(t => t.completed).length / statusInfo.timeline.length) * 100);
+            
+            return `
+                <div class="mt-3">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <small class="text-white">Progress</small>
+                        <small class="text-white">${progress}%</small>
+                    </div>
+                    <div class="progress" style="height: 6px;">
+                        <div class="progress-bar bg-primary" role="progressbar" style="width: ${progress}%"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Helper function to get status timeline
+        function getStatusTimeline(task) {
+            const statusInfo = dataManager.getTaskStatusInfo(task.id);
+            if (!statusInfo) return '';
+
+            const timeline = statusInfo.timeline;
+            const currentStep = timeline.findIndex(t => !t.completed);
+            
+            return `
+                <div class="mt-3">
+                    <small class="text-white d-block mb-2">Status Timeline</small>
+                    <div class="status-steps">
+                        ${timeline.map((step, index) => `
+                            <div class="status-step ${index < currentStep ? 'completed' : index === currentStep ? 'current' : 'pending'}">
+                                <div class="step-dot"></div>
+                                <div class="step-label">${step.label}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
         }
 
         function loadTaskApplications(taskId) {

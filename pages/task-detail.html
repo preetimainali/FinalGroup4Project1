@@ -154,6 +154,14 @@
                             <p class="card-text" id="task-description">Loading task description...</p>
                         </div>
 
+                        <!-- Task Status Timeline -->
+                        <div class="mb-4">
+                            <h5 class="fw-bold mb-3">Task Status</h5>
+                            <div id="task-status-timeline" class="status-timeline">
+                                <!-- Timeline will be populated by JavaScript -->
+                            </div>
+                        </div>
+
                         <!-- Task Details Grid -->
                         <div class="row mb-4">
                             <div class="col-md-6">
@@ -838,6 +846,7 @@
                 if (taskId && window.app) {
                     const task = dataManager.getTaskById(taskId);
                     if (task) {
+                        loadTaskStatusTimeline(taskId);
                         loadSimilarTasks(task);
                         
                         // Show completion details if task is completed
@@ -861,6 +870,170 @@
                 }
             }, 200);
         });
+
+        // Function to load and display task status timeline
+        function loadTaskStatusTimeline(taskId) {
+            const task = dataManager.getTaskById(taskId);
+            if (!task) return;
+
+            const statusInfo = dataManager.getTaskStatusInfo(taskId);
+            const timelineContainer = document.getElementById('task-status-timeline');
+            
+            if (!timelineContainer || !statusInfo) return;
+
+            const timeline = statusInfo.timeline;
+            const currentUser = window.app ? window.app.getCurrentUser() : null;
+            const isPoster = task.posterEmail === currentUser;
+            const isHelper = dataManager.isUserHelperForTask(taskId, currentUser);
+
+            timelineContainer.innerHTML = '';
+
+            timeline.forEach((item, index) => {
+                const timelineItem = document.createElement('div');
+                timelineItem.className = 'timeline-item';
+                
+                // Determine item state
+                if (item.completed) {
+                    timelineItem.classList.add('completed');
+                } else if (index === timeline.findIndex(t => !t.completed)) {
+                    timelineItem.classList.add('current');
+                } else {
+                    timelineItem.classList.add('pending');
+                }
+
+                const timestamp = new Date(item.timestamp).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                // Only show actions for the current status item
+                const showActions = index === timeline.findIndex(t => !t.completed);
+                const actionsHtml = showActions ? getStatusActions(item.status, statusInfo.nextActions, taskId, isPoster, isHelper) : '';
+
+                timelineItem.innerHTML = `
+                    <div class="timeline-content">
+                        <div class="timeline-title">${item.label}</div>
+                        <div class="timeline-description">${getStatusDescription(item.status, task)}</div>
+                        <div class="timeline-timestamp">${timestamp}</div>
+                        ${actionsHtml}
+                    </div>
+                `;
+
+                timelineContainer.appendChild(timelineItem);
+            });
+        }
+
+        // Function to get status description
+        function getStatusDescription(status, task) {
+            switch (status) {
+                case 'posted':
+                    return 'Task has been posted and is open for applications';
+                case 'assigned':
+                    return 'A helper has been assigned to this task';
+                case 'completed':
+                    return 'Task has been completed successfully';
+                case 'cancelled':
+                    return 'Task has been cancelled';
+                default:
+                    return 'Task status updated';
+            }
+        }
+
+        // Function to get status actions
+        function getStatusActions(status, nextActions, taskId, isPoster, isHelper) {
+            if (!nextActions || nextActions.length === 0) return '';
+
+            const actionsHtml = nextActions.map(action => {
+                let buttonClass = 'primary';
+                let actionFunction = '';
+
+                switch (action.action) {
+                    case 'review_applications':
+                        buttonClass = 'primary';
+                        actionFunction = `showApplications(${taskId})`;
+                        break;
+                    case 'mark_completed':
+                        buttonClass = 'success';
+                        actionFunction = `markTaskCompleted(${taskId})`;
+                        break;
+                    case 'cancel_task':
+                        buttonClass = 'danger';
+                        actionFunction = `cancelTask(${taskId})`;
+                        break;
+                    case 'start_work':
+                        buttonClass = 'primary';
+                        actionFunction = `startWork(${taskId})`;
+                        break;
+                    case 'request_completion':
+                        buttonClass = 'success';
+                        actionFunction = `requestCompletion(${taskId})`;
+                        break;
+                    case 'rate_helper':
+                        buttonClass = 'primary';
+                        actionFunction = `rateHelper(${taskId})`;
+                        break;
+                    case 'rate_poster':
+                        buttonClass = 'primary';
+                        actionFunction = `ratePoster(${taskId})`;
+                        break;
+                    case 'reopen_task':
+                        buttonClass = 'warning';
+                        actionFunction = `reopenTask(${taskId})`;
+                        break;
+                }
+
+                return `<button class="timeline-action-btn ${buttonClass}" onclick="${actionFunction}">${action.label}</button>`;
+            }).join('');
+
+            return `<div class="timeline-actions">${actionsHtml}</div>`;
+        }
+
+        // Status action functions
+        function startWork(taskId) {
+            if (window.app) {
+                window.app.startWork(taskId);
+            }
+        }
+
+        function requestCompletion(taskId) {
+            if (window.app) {
+                window.app.requestCompletion(taskId);
+            }
+        }
+
+        function cancelTask(taskId) {
+            if (window.app) {
+                window.app.cancelTask(taskId);
+            }
+        }
+
+        function reopenTask(taskId) {
+            if (window.app) {
+                window.app.reopenTask(taskId);
+            }
+        }
+
+        function showApplications(taskId) {
+            // Scroll to applications section
+            const applicationsSection = document.getElementById('applications-section');
+            if (applicationsSection) {
+                applicationsSection.style.display = 'block';
+                applicationsSection.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function rateHelper(taskId) {
+            // TODO: Implement rating functionality
+            alert('Rating functionality coming soon!');
+        }
+
+        function ratePoster(taskId) {
+            // TODO: Implement rating functionality
+            alert('Rating functionality coming soon!');
+        }
 
         // Add completion form event listener
         document.addEventListener('DOMContentLoaded', () => {

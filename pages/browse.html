@@ -335,59 +335,21 @@
                                 <div class="filter-section">
                                     <label class="filter-title">Status</label>
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="open" id="status-open-mobile">
+                                        <input class="form-check-input" type="checkbox" value="open" id="status-open-mobile" name="status" checked>
                                         <label class="form-check-label" for="status-open-mobile">
                                             Open Tasks
                                         </label>
                                     </div>
                                     <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" value="assigned" id="status-assigned-mobile">
+                                        <input class="form-check-input" type="checkbox" value="assigned" id="status-assigned-mobile" name="status" checked>
                                         <label class="form-check-label" for="status-assigned-mobile">
                                             Assigned Tasks
                                         </label>
                                     </div>
                                 </div>
 
-                                <!-- Job Type -->
-                                <div class="filter-section">
-                                    <label class="filter-title">Job Type</label>
-                                    <select class="form-select" id="job-type-mobile">
-                                        <option value="">All Types</option>
-                                        <option value="one-time">One-time</option>
-                                        <option value="recurring">Recurring</option>
-                                        <option value="project">Project</option>
-                                    </select>
-                                </div>
 
-                                <!-- College -->
-                                <div class="filter-section">
-                                    <label class="filter-title">College</label>
-                                    <select class="form-select" id="college-filter-mobile">
-                                        <option value="">All Colleges</option>
-                                        <option value="MIT">MIT</option>
-                                        <option value="Harvard">Harvard</option>
-                                        <option value="Stanford">Stanford</option>
-                                        <option value="UC Berkeley">UC Berkeley</option>
-                                    </select>
-                                </div>
 
-                                <!-- Location -->
-                                <div class="filter-section">
-                                    <label class="filter-title">Location</label>
-                                    <input type="text" class="form-control" id="location-filter-mobile" placeholder="Enter location...">
-                                </div>
-
-                                <!-- Time -->
-                                <div class="filter-section">
-                                    <label class="filter-title">Time</label>
-                                    <select class="form-select" id="time-filter-mobile">
-                                        <option value="">Any Time</option>
-                                        <option value="today">Today</option>
-                                        <option value="tomorrow">Tomorrow</option>
-                                        <option value="this-week">This Week</option>
-                                        <option value="this-month">This Month</option>
-                                    </select>
-                                </div>
 
                                 <!-- Pay Range -->
                                 <div class="filter-section">
@@ -403,34 +365,7 @@
                                 </div>
 
                                 <!-- Deadline -->
-                                <div class="filter-section">
-                                    <label for="deadline-filter-mobile" class="filter-title">Deadline</label>
-                                    <input type="date" class="form-control" id="deadline-filter-mobile">
-                                </div>
 
-                                <!-- Minimum Poster Rating -->
-                                <div class="filter-section">
-                                    <label class="filter-title">Minimum Poster Rating</label>
-                                    <select class="form-select" id="min-rating-mobile">
-                                        <option value="">Any Rating</option>
-                                        <option value="4.5">4.5+ Stars</option>
-                                        <option value="4.0">4.0+ Stars</option>
-                                        <option value="3.5">3.5+ Stars</option>
-                                        <option value="3.0">3.0+ Stars</option>
-                                    </select>
-                                </div>
-
-                                <!-- Maximum Distance -->
-                                <div class="filter-section">
-                                    <label class="filter-title">Maximum Distance</label>
-                                    <select class="form-select" id="max-distance-mobile">
-                                        <option value="">Any Distance</option>
-                                        <option value="1">Within 1 mile</option>
-                                        <option value="5">Within 5 miles</option>
-                                        <option value="10">Within 10 miles</option>
-                                        <option value="25">Within 25 miles</option>
-                                    </select>
-                                </div>
 
                                 <div class="d-grid gap-2 mt-4">
                                     <button type="submit" class="btn btn-primary">Apply Filters</button>
@@ -465,41 +400,19 @@
                         <div class="filter-section">
                             <label class="filter-title">Status</label>
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="open" id="status-open">
+                                <input class="form-check-input" type="checkbox" value="open" id="status-open" name="status" checked>
                                 <label class="form-check-label" for="status-open">
                                     Open Tasks
                                 </label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input" type="checkbox" value="assigned" id="status-assigned">
+                                <input class="form-check-input" type="checkbox" value="assigned" id="status-assigned" name="status" checked>
                                 <label class="form-check-label" for="status-assigned">
                                     Assigned Tasks
                                 </label>
                             </div>
                         </div>
 
-                        <!-- Job Type -->
-                        <div class="filter-section">
-                            <label class="filter-title">Job Type</label>
-                            <select class="form-select" id="job-type">
-                                <option value="">All Types</option>
-                                <option value="one-time">One-time</option>
-                                <option value="recurring">Recurring</option>
-                                <option value="project">Project</option>
-                            </select>
-                        </div>
-
-                        <!-- College -->
-                        <div class="filter-section">
-                            <label class="filter-title">College</label>
-                            <select class="form-select" id="college-filter">
-                                <option value="">All Colleges</option>
-                                <option value="MIT">MIT</option>
-                                <option value="Harvard">Harvard</option>
-                                <option value="Stanford">Stanford</option>
-                                <option value="UC Berkeley">UC Berkeley</option>
-                            </select>
-                        </div>
 
                         <!-- University -->
                         <div class="filter-section">
@@ -562,23 +475,6 @@
                             </select>
                         </div>
 
-                        <!-- Location -->
-                        <div class="filter-section">
-                            <label class="filter-title">Location</label>
-                            <input type="text" class="form-control" id="location-filter" placeholder="Enter location...">
-                        </div>
-
-                        <!-- Time -->
-                        <div class="filter-section">
-                            <label class="filter-title">Time</label>
-                            <select class="form-select" id="time-filter">
-                                <option value="">Any Time</option>
-                                <option value="today">Today</option>
-                                <option value="tomorrow">Tomorrow</option>
-                                <option value="this-week">This Week</option>
-                                <option value="this-month">This Month</option>
-                            </select>
-                        </div>
 
                         <!-- Pay Range -->
                         <div class="filter-section">
@@ -594,34 +490,7 @@
                         </div>
 
                         <!-- Deadline -->
-                        <div class="filter-section">
-                            <label for="deadline-filter" class="filter-title">Deadline</label>
-                            <input type="date" class="form-control" id="deadline-filter">
-                        </div>
 
-                        <!-- Minimum Poster Rating -->
-                        <div class="filter-section">
-                            <label class="filter-title">Minimum Poster Rating</label>
-                            <select class="form-select" id="min-rating">
-                                <option value="">Any Rating</option>
-                                <option value="4.5">4.5+ Stars</option>
-                                <option value="4.0">4.0+ Stars</option>
-                                <option value="3.5">3.5+ Stars</option>
-                                <option value="3.0">3.0+ Stars</option>
-                            </select>
-                        </div>
-
-                        <!-- Maximum Distance -->
-                        <div class="filter-section">
-                            <label class="filter-title">Maximum Distance</label>
-                            <select class="form-select" id="max-distance">
-                                <option value="">Any Distance</option>
-                                <option value="1">Within 1 mile</option>
-                                <option value="5">Within 5 miles</option>
-                                <option value="10">Within 10 miles</option>
-                                <option value="25">Within 25 miles</option>
-                            </select>
-                        </div>
 
                         <div class="d-grid gap-2 mt-4">
                             <button type="submit" class="btn btn-primary">Apply Filters</button>

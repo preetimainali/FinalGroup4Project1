@@ -140,3 +140,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Bootstrap for the UI framework
 - Unsplash for profile pictures
 - University of Alabama for the project context
+

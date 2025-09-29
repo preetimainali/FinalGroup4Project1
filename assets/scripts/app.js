@@ -233,8 +233,10 @@ class GetItDoneApp {
         const searchQuery = document.getElementById('search-input')?.value || '';
         let tasks = dataManager.searchTasks(searchQuery, filters);
         
-        // Filter out completed tasks from browse page
-        tasks = tasks.filter(task => task.status !== 'completed');
+        // Only filter out completed tasks if no status filter is applied
+        if (!filters.status || filters.status.length === 0) {
+            tasks = tasks.filter(task => task.status !== 'completed');
+        }
         
         const sortBy = document.getElementById('sort-select')?.value || 'newest';
         const sortedTasks = dataManager.sortTasks(tasks, sortBy);
@@ -265,16 +267,26 @@ class GetItDoneApp {
         // All filter types
         this.setupTagFilters();
         this.setupStatusFilters();
-        this.setupJobTypeFilters();
-        this.setupCollegeFilters();
-        this.setupLocationFilters();
-        this.setupTimeFilters();
+        this.setupPriceFilters();
 
         // Apply filters on change
         filterForm.addEventListener('change', () => {
             const filters = this.getActiveFilters();
             this.loadAllTasks(filters);
         });
+
+        // Handle search input
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) {
+            let searchTimeout;
+            searchInput.addEventListener('input', () => {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(() => {
+                    const filters = this.getActiveFilters();
+                    this.loadAllTasks(filters);
+                }, 300);
+            });
+        }
     }
 
     setupTagFilters() {
@@ -284,125 +296,73 @@ class GetItDoneApp {
         const popularTags = dataManager.getPopularTags();
         tagContainer.innerHTML = '';
 
-        popularTags.forEach(tag => {
-            const div = document.createElement('div');
-            div.className = 'form-check';
-            div.innerHTML = `
-                <input class="form-check-input" type="checkbox" value="${tag}" id="tag-${tag}" name="tags">
-                <label class="form-check-label" for="tag-${tag}">
-                    #${tag}
-                </label>
-            `;
-            tagContainer.appendChild(div);
-        });
+        // Handle organized tags
+        if (typeof popularTags === 'object' && !Array.isArray(popularTags)) {
+            Object.entries(popularTags).forEach(([category, tags]) => {
+                if (tags.length > 0) {
+                    const categoryDiv = document.createElement('div');
+                    categoryDiv.className = 'mb-2';
+                    categoryDiv.innerHTML = `<small class="text-muted fw-bold">${category}</small>`;
+                    tagContainer.appendChild(categoryDiv);
+                    
+                    tags.forEach(tag => {
+                        const div = document.createElement('div');
+                        div.className = 'form-check form-check-sm';
+                        div.innerHTML = `
+                            <input class="form-check-input" type="checkbox" value="${tag}" id="tag-${tag}" name="tags">
+                            <label class="form-check-label" for="tag-${tag}">
+                                #${tag}
+                            </label>
+                        `;
+                        tagContainer.appendChild(div);
+                    });
+                }
+            });
+        } else {
+            // Fallback for array format
+            popularTags.forEach(tag => {
+                const div = document.createElement('div');
+                div.className = 'form-check form-check-sm';
+                div.innerHTML = `
+                    <input class="form-check-input" type="checkbox" value="${tag}" id="tag-${tag}" name="tags">
+                    <label class="form-check-label" for="tag-${tag}">
+                        #${tag}
+                    </label>
+                `;
+                tagContainer.appendChild(div);
+            });
+        }
     }
 
     setupStatusFilters() {
-        const statusContainer = document.getElementById('status-filters');
-        if (!statusContainer) return;
+        // Status filters are already in HTML, no need to populate
+    }
 
-        const statuses = [
-            { value: 'open', label: 'Open' },
-            { value: 'review', label: 'Under Review' },
-            { value: 'assigned', label: 'Assigned' }
-        ];
 
-        statusContainer.innerHTML = '';
 
-        statuses.forEach(status => {
-            const div = document.createElement('div');
-            div.className = 'form-check';
-            div.innerHTML = `
-                <input class="form-check-input" type="checkbox" value="${status.value}" id="status-${status.value}" name="status" checked>
-                <label class="form-check-label" for="status-${status.value}">
-                    ${status.label}
-                </label>
+    setupPriceFilters() {
+        // Add price range inputs if they don't exist
+        const priceSection = document.querySelector('#filter-form .filter-section:last-child');
+        if (priceSection && !document.getElementById('min-price')) {
+            const priceDiv = document.createElement('div');
+            priceDiv.className = 'filter-section';
+            priceDiv.innerHTML = `
+                <label class="filter-title">Price Range</label>
+                <div class="row">
+                    <div class="col-6">
+                        <input type="number" class="form-control" id="min-price" placeholder="Min $" min="0" step="0.01">
+                    </div>
+                    <div class="col-6">
+                        <input type="number" class="form-control" id="max-price" placeholder="Max $" min="0" step="0.01">
+                    </div>
+                </div>
             `;
-            statusContainer.appendChild(div);
-        });
+            priceSection.parentNode.insertBefore(priceDiv, priceSection.nextSibling);
+        }
     }
 
-    setupLocationFilters() {
-        const locationSelect = document.getElementById('location-filter');
-        if (!locationSelect) return;
 
-        const locations = [
-            { value: '', label: 'All Locations' },
-            { value: 'Campus', label: 'Campus' },
-            { value: 'Riverside', label: 'Riverside' },
-            { value: 'Lakeside', label: 'Lakeside' },
-            { value: 'Hewson', label: 'Hewson' },
-            { value: 'Student Center', label: 'Student Center' }
-        ];
 
-        locationSelect.innerHTML = '';
-
-        locations.forEach(location => {
-            const option = document.createElement('option');
-            option.value = location.value;
-            option.textContent = location.label;
-            locationSelect.appendChild(option);
-        });
-    }
-
-    setupTimeFilters() {
-        const timeSelect = document.getElementById('time-filter');
-        if (!timeSelect) return;
-
-        const timeOptions = [
-            { value: '', label: 'Any Time' },
-            { value: 'today', label: 'Today' },
-            { value: 'tomorrow', label: 'Tomorrow' },
-            { value: 'weekend', label: 'This Weekend' }
-        ];
-
-        timeSelect.innerHTML = '';
-
-        timeOptions.forEach(option => {
-            const optionElement = document.createElement('option');
-            optionElement.value = option.value;
-            optionElement.textContent = option.label;
-            timeSelect.appendChild(optionElement);
-        });
-    }
-
-    setupJobTypeFilters() {
-        const container = document.getElementById('job-type-filters');
-        if (!container) return;
-
-        const jobTypes = [
-            { value: 'local', text: 'Local Jobs', icon: 'bi-geo-alt' },
-            { value: 'remote', text: 'Remote Jobs', icon: 'bi-laptop' }
-        ];
-
-        container.innerHTML = '';
-        jobTypes.forEach(jobType => {
-            const checkbox = document.createElement('div');
-            checkbox.className = 'form-check';
-            checkbox.innerHTML = `
-                <input class="form-check-input" type="checkbox" id="job-type-${jobType.value}" value="${jobType.value}">
-                <label class="form-check-label" for="job-type-${jobType.value}">
-                    <i class="bi ${jobType.icon} me-2"></i>${jobType.text}
-                </label>
-            `;
-            container.appendChild(checkbox);
-        });
-    }
-
-    setupCollegeFilters() {
-        const collegeSelect = document.getElementById('college-filter');
-        if (!collegeSelect) return;
-
-        const colleges = dataManager.getUSColleges();
-        collegeSelect.innerHTML = '<option value="">All colleges</option>';
-        
-        colleges.forEach(college => {
-            const option = document.createElement('option');
-            option.value = college;
-            option.textContent = college;
-            collegeSelect.appendChild(option);
-        });
-    }
 
     setupSearch() {
         const searchInput = document.getElementById('search-input');
@@ -470,17 +430,7 @@ class GetItDoneApp {
         const form = document.getElementById('filter-form');
         if (!form) return {};
 
-        const formData = new FormData(form);
         const filters = {};
-
-        // Get category filter from URL or hidden input
-        const urlParams = new URLSearchParams(window.location.search);
-        const categoryFromUrl = urlParams.get('category');
-        const categoryFromForm = formData.get('category');
-        const category = categoryFromUrl || categoryFromForm;
-        if (category) {
-            filters.category = category;
-        }
 
         // Get search term
         const searchInput = document.getElementById('search-input');
@@ -488,41 +438,43 @@ class GetItDoneApp {
             filters.search = searchInput.value.trim();
         }
 
-        // Get selected tags
-        const tags = formData.getAll('tags');
-        if (tags.length > 0) {
-            filters.tags = tags;
+        // Get tags
+        const tagCheckboxes = form.querySelectorAll('input[name="tags"]:checked');
+        if (tagCheckboxes.length > 0) {
+            filters.tags = Array.from(tagCheckboxes).map(cb => cb.value);
         }
 
-        // Get selected statuses
-        const statuses = formData.getAll('status');
-        if (statuses.length > 0) {
-            filters.status = statuses;
+        // Get status
+        const statusCheckboxes = form.querySelectorAll('input[name="status"]:checked');
+        if (statusCheckboxes.length > 0) {
+            filters.status = Array.from(statusCheckboxes).map(cb => cb.value);
         }
 
-        // Get selected job types
-        const jobTypeCheckboxes = form.querySelectorAll('input[id^="job-type-"]:checked');
-        if (jobTypeCheckboxes.length > 0) {
-            filters.jobType = Array.from(jobTypeCheckboxes).map(cb => cb.value);
+
+        // Get university
+        const universitySelect = document.getElementById('university-filter');
+        if (universitySelect && universitySelect.value) {
+            filters.university = [universitySelect.value];
         }
 
-        // Get college filter
-        const college = formData.get('college');
-        if (college) {
-            filters.college = [college];
+
+        // Get price range
+        const minPrice = document.getElementById('min-price');
+        const maxPrice = document.getElementById('max-price');
+        if (minPrice && minPrice.value) {
+            filters.priceRange = { ...filters.priceRange, min: parseFloat(minPrice.value) };
+        }
+        if (maxPrice && maxPrice.value) {
+            filters.priceRange = { ...filters.priceRange, max: parseFloat(maxPrice.value) };
         }
 
-        // Get location filter (legacy)
-        const location = formData.get('location');
-        if (location) {
-            filters.location = location;
+        // Get category from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const category = urlParams.get('category');
+        if (category) {
+            filters.category = category;
         }
 
-        // Get time filter
-        const timeFilter = formData.get('timeFilter');
-        if (timeFilter) {
-            filters.timeFilter = timeFilter;
-        }
 
         return filters;
     }
@@ -998,30 +950,44 @@ class GetItDoneApp {
         const popularTags = dataManager.getPopularTags();
         let selectedTags = [];
 
-        // Create tag checkboxes
+        // Create organized tag checkboxes
         const tagCheckboxes = document.getElementById('tag-checkboxes');
         if (tagCheckboxes) {
-            popularTags.forEach(tag => {
-                const div = document.createElement('div');
-                div.className = 'form-check form-check-inline';
-                div.innerHTML = `
-                    <input class="form-check-input" type="checkbox" value="${tag}" id="checkbox-${tag}">
-                    <label class="form-check-label" for="checkbox-${tag}">#${tag}</label>
-                `;
-                tagCheckboxes.appendChild(div);
-            });
-
-            // Handle checkbox changes
-            tagCheckboxes.addEventListener('change', (e) => {
-                if (e.target.type === 'checkbox') {
-                    if (e.target.checked) {
-                        selectedTags.push(e.target.value);
-                    } else {
-                        selectedTags = selectedTags.filter(tag => tag !== e.target.value);
-                    }
-                    this.updateSelectedTags(tagContainer, selectedTags);
+            tagCheckboxes.innerHTML = '';
+            
+            // Create organized tag display
+            Object.entries(popularTags).forEach(([category, tags]) => {
+                if (tags.length > 0) {
+                    // Create category header
+                    const categoryHeader = document.createElement('div');
+                    categoryHeader.className = 'col-12 mb-3';
+                    categoryHeader.innerHTML = `
+                        <h6 class="text-primary fw-bold mb-2">
+                            <i class="bi bi-tag me-1"></i>${category}
+                        </h6>
+                    `;
+                    tagCheckboxes.appendChild(categoryHeader);
+                    
+                    // Create tag buttons for this category
+                    const tagRow = document.createElement('div');
+                    tagRow.className = 'col-12 mb-3';
+                    
+                    tags.forEach(tag => {
+                        const tagButton = document.createElement('button');
+                        tagButton.type = 'button';
+                        tagButton.className = 'btn btn-outline-primary btn-sm tag-button me-2 mb-2';
+                        tagButton.innerHTML = `#${tag}`;
+                        tagButton.dataset.tag = tag;
+                        tagButton.onclick = () => this.toggleTag(tagButton, tag, selectedTags, tagContainer);
+                        tagRow.appendChild(tagButton);
+                    });
+                    
+                    tagCheckboxes.appendChild(tagRow);
                 }
             });
+
+            // Store selectedTags in a way that's accessible to toggleTag
+            window.selectedTags = selectedTags;
         }
 
         // Handle custom tag input
@@ -1036,6 +1002,22 @@ class GetItDoneApp {
                 }
             }
         });
+    }
+
+    toggleTag(button, tag, selectedTags, container) {
+        if (selectedTags.includes(tag)) {
+            // Remove tag
+            const index = selectedTags.indexOf(tag);
+            selectedTags.splice(index, 1);
+            button.classList.remove('btn-primary');
+            button.classList.add('btn-outline-primary');
+        } else {
+            // Add tag
+            selectedTags.push(tag);
+            button.classList.remove('btn-outline-primary');
+            button.classList.add('btn-primary');
+        }
+        this.updateSelectedTags(container, selectedTags);
     }
 
     updateSelectedTags(container, tags) {
@@ -1396,7 +1378,10 @@ class GetItDoneApp {
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-start mb-2">
                         <h5 class="card-title task-title">${task.title}</h5>
-                        <span class="status-badge ${statusClass}">${statusText}</span>
+                        <div class="d-flex flex-column align-items-end">
+                            <span class="status-badge ${statusClass}">${statusText}</span>
+                            ${this.getTaskStatusProgress(task)}
+                        </div>
                     </div>
                     <p class="card-text text-muted mb-3">${task.description.substring(0, 100)}${task.description.length > 100 ? '...' : ''}</p>
                     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -1568,6 +1553,19 @@ class GetItDoneApp {
     openMessagesModal() {
         const modal = new bootstrap.Modal(document.getElementById('messages-modal'));
         this.loadConversations();
+        
+        // Reset modal state
+        const messagesContent = document.getElementById('messages-content');
+        const noConversationSelected = document.getElementById('no-conversation-selected');
+        
+        if (messagesContent) {
+            messagesContent.style.display = 'none';
+        }
+        
+        if (noConversationSelected) {
+            noConversationSelected.style.display = 'block';
+        }
+        
         modal.show();
     }
 
@@ -1973,11 +1971,12 @@ class GetItDoneApp {
             }
         });
 
-        // Update conversations list
+        // Update conversations list - check for both regular and modal versions
         const conversationsList = document.getElementById('conversations-list');
         const conversationsListFull = document.getElementById('conversations-list-full');
+        const conversationsListModal = document.getElementById('conversations-list-modal');
         
-        [conversationsList, conversationsListFull].forEach(list => {
+        [conversationsList, conversationsListFull, conversationsListModal].forEach(list => {
             if (!list) return;
             
             list.innerHTML = '';
@@ -1990,7 +1989,7 @@ class GetItDoneApp {
             conversations.slice(0, list === conversationsList ? 3 : 10).forEach(conversation => {
                 const otherUser = dataManager.getUserByEmail(conversation.otherUserEmail);
                 const conversationElement = document.createElement('div');
-                conversationElement.className = `dropdown-item ${list === conversationsListFull ? 'border-bottom' : ''} ${conversation.unreadCount > 0 ? 'bg-light' : ''}`;
+                conversationElement.className = `list-group-item ${list === conversationsListFull || list === conversationsListModal ? 'border-bottom' : ''} ${conversation.unreadCount > 0 ? 'bg-light' : ''}`;
                 conversationElement.innerHTML = `
                     <div class="d-flex align-items-center">
                         <img src="${otherUser?.profilePicture || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTYiIGZpbGw9IiNGMUY1RjkiLz4KPHN2ZyB3aWR0aD0iMTYiIGhlaWdodD0iMTYiIHZpZXdCb3g9IjAgMCAxNiAxNiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4PSI4IiB5PSI4Ij4KPGNpcmNsZSBjeD0iOCIgY3k9IjYiIHI9IjIiIGZpbGw9IiM2QjcyODAiLz4KPHBhdGggZD0iTTQgMTNjMC0yLjIxIDEuNzktNCA0LTRzNCAxLjc5IDQgNHYxSDh2LTF6IiBmaWxsPSIjNkI3MjgwIi8+Cjwvc3ZnPgo8L3N2Zz4K'}" 
@@ -2004,7 +2003,7 @@ class GetItDoneApp {
                     </div>
                 `;
                 conversationElement.addEventListener('click', () => {
-                    if (list === conversationsListFull) {
+                    if (list === conversationsListFull || list === conversationsListModal) {
                         this.selectConversation(conversation.otherUserEmail);
                     } else {
                         showMessagesModal();
@@ -2020,11 +2019,15 @@ class GetItDoneApp {
 
     setupMessageForm() {
         const messageForm = document.getElementById('message-form');
-        if (!messageForm) return;
-
-        messageForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.sendMessage();
+        const messageFormModal = document.getElementById('message-form-modal');
+        
+        [messageForm, messageFormModal].forEach(form => {
+            if (!form) return;
+            
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.sendMessage();
+            });
         });
     }
 
@@ -2034,8 +2037,26 @@ class GetItDoneApp {
         
         // Show message compose area
         const messageCompose = document.getElementById('message-compose');
+        const messagesContent = document.getElementById('messages-content');
+        const noConversationSelected = document.getElementById('no-conversation-selected');
+        
         if (messageCompose) {
             messageCompose.style.display = 'block';
+        }
+        
+        if (messagesContent) {
+            messagesContent.style.display = 'block';
+        }
+        
+        if (noConversationSelected) {
+            noConversationSelected.style.display = 'none';
+        }
+
+        // Update conversation title
+        const conversationTitle = document.getElementById('conversation-title');
+        if (conversationTitle) {
+            const otherUser = dataManager.getUserByEmail(otherUserEmail);
+            conversationTitle.textContent = otherUser ? otherUser.name : 'User';
         }
 
         // Mark messages as read
@@ -2061,13 +2082,15 @@ class GetItDoneApp {
     loadMessages(otherUserEmail) {
         const messages = dataManager.getMessagesBetweenUsers(this.currentUser, otherUserEmail);
         const messagesArea = document.getElementById('messages-area');
+        const messagesContainerModal = document.getElementById('messages-container-modal');
         
-        if (!messagesArea) return;
+        const targetContainer = messagesArea || messagesContainerModal;
+        if (!targetContainer) return;
 
-        messagesArea.innerHTML = '';
+        targetContainer.innerHTML = '';
         
         if (messages.length === 0) {
-            messagesArea.innerHTML = '<div class="text-center text-muted py-3">No messages yet. Start the conversation!</div>';
+            targetContainer.innerHTML = '<div class="text-center text-muted py-3">No messages yet. Start the conversation!</div>';
             return;
         }
 
@@ -2085,18 +2108,21 @@ class GetItDoneApp {
                 </div>
             `;
             
-            messagesArea.appendChild(messageElement);
+            targetContainer.appendChild(messageElement);
         });
 
         // Scroll to bottom
-        messagesArea.scrollTop = messagesArea.scrollHeight;
+        targetContainer.scrollTop = targetContainer.scrollHeight;
     }
 
     sendMessage() {
         const messageInput = document.getElementById('message-input');
-        if (!messageInput || !this.currentConversation) return;
+        const messageInputModal = document.getElementById('message-input-modal');
+        
+        const input = messageInput || messageInputModal;
+        if (!input || !this.currentConversation) return;
 
-        const content = messageInput.value.trim();
+        const content = input.value.trim();
         if (!content) return;
 
         const messageData = {
@@ -2109,7 +2135,7 @@ class GetItDoneApp {
         dataManager.addMessage(messageData);
         
         // Clear input and reload messages
-        messageInput.value = '';
+        input.value = '';
         this.loadMessages(this.currentConversation);
         this.loadConversations();
     }
@@ -2121,67 +2147,6 @@ class GetItDoneApp {
     }
 
     // Enhanced Search with New Filters
-    getActiveFilters() {
-        const form = document.getElementById('filter-form');
-        if (!form) return {};
-
-        const formData = new FormData(form);
-        const filters = {};
-
-        // Existing filters
-        const tags = formData.getAll('tags');
-        if (tags.length > 0) {
-            filters.tags = tags;
-        }
-
-        const statuses = formData.getAll('status');
-        if (statuses.length > 0) {
-            filters.status = statuses;
-        }
-
-        const jobTypeCheckboxes = form.querySelectorAll('input[id^="job-type-"]:checked');
-        if (jobTypeCheckboxes.length > 0) {
-            filters.jobType = Array.from(jobTypeCheckboxes).map(cb => cb.value);
-        }
-
-        const college = formData.get('college');
-        if (college) {
-            filters.college = [college];
-        }
-
-        const location = formData.get('location');
-        if (location) {
-            filters.location = location;
-        }
-
-        const timeFilter = formData.get('timeFilter');
-        if (timeFilter) {
-            filters.timeFilter = timeFilter;
-        }
-
-        // New filters
-        const minPrice = document.getElementById('min-price')?.value;
-        const maxPrice = document.getElementById('max-price')?.value;
-        if (minPrice || maxPrice) {
-            filters.priceRange = {
-                min: parseInt(minPrice) || 0,
-                max: parseInt(maxPrice) || 999999
-            };
-        }
-
-        const ratingFilter = document.getElementById('rating-filter')?.value;
-        if (ratingFilter) {
-            filters.minRating = parseFloat(ratingFilter);
-        }
-
-        const distanceFilter = document.getElementById('distance-filter')?.value;
-        if (distanceFilter && this.userLocation) {
-            filters.maxDistance = parseInt(distanceFilter);
-            filters.userLocation = this.userLocation;
-        }
-
-        return filters;
-    }
 
     // Profile and Rating System
     createFillerProfile(userEmail) {
@@ -2313,22 +2278,122 @@ class GetItDoneApp {
             hour12: true 
         });
     }
+
+    // Task Status Control Methods
+    updateTaskStatus(taskId, newStatus, updateData = {}) {
+        return dataManager.updateTaskStatus(taskId, newStatus, updateData);
+    }
+
+    getTaskStatusInfo(taskId) {
+        return dataManager.getTaskStatusInfo(taskId);
+    }
+
+    getTaskStatusProgress(task) {
+        const statusInfo = dataManager.getTaskStatusInfo(task.id);
+        if (!statusInfo) return '';
+
+        const progress = Math.round((statusInfo.timeline.filter(t => t.completed).length / statusInfo.timeline.length) * 100);
+        
+        return `
+            <div class="status-progress mt-1">
+                <div class="progress" style="height: 4px; width: 60px;">
+                    <div class="progress-bar bg-primary" role="progressbar" style="width: ${progress}%"></div>
+                </div>
+                <small class="text-muted">${progress}%</small>
+            </div>
+        `;
+    }
+
+    // Task Status Actions
+    startWork(taskId) {
+        const task = dataManager.getTaskById(taskId);
+        if (!task) return;
+
+        if (confirm('Are you ready to start working on this task?')) {
+            this.updateTaskStatus(taskId, 'in_progress', {
+                workStartedAt: new Date().toISOString()
+            });
+            
+            this.showSuccess('Work started! The poster has been notified.');
+            this.loadConversations();
+        }
+    }
+
+    requestCompletion(taskId) {
+        const task = dataManager.getTaskById(taskId);
+        if (!task) return;
+
+        if (confirm('Request the poster to mark this task as completed?')) {
+            // Create notification for poster
+            const poster = dataManager.getUserByEmail(task.posterEmail);
+            if (poster) {
+                dataManager.addNotification({
+                    userId: poster.id,
+                    type: 'completion_requested',
+                    title: 'Completion Requested',
+                    message: `The helper has requested to mark "${task.title}" as completed.`,
+                    data: { taskId: task.id }
+                });
+            }
+            
+            this.showSuccess('Completion request sent to the poster!');
+        }
+    }
+
+    cancelTask(taskId) {
+        const task = dataManager.getTaskById(taskId);
+        if (!task) return;
+
+        if (confirm('Are you sure you want to cancel this task? This action cannot be undone.')) {
+            this.updateTaskStatus(taskId, 'cancelled', {
+                cancelledAt: new Date().toISOString(),
+                cancelledBy: this.currentUser
+            });
+            
+            this.showSuccess('Task cancelled successfully.');
+            this.loadConversations();
+        }
+    }
+
+    reopenTask(taskId) {
+        const task = dataManager.getTaskById(taskId);
+        if (!task) return;
+
+        if (confirm('Are you sure you want to reopen this task? It will be available for new applications.')) {
+            this.updateTaskStatus(taskId, 'open', {
+                reopenedAt: new Date().toISOString(),
+                reopenedBy: this.currentUser
+            });
+            
+            this.showSuccess('Task reopened successfully.');
+            this.loadConversations();
+        }
+    }
     
 }
 
 // Global functions for HTML onclick handlers
 function removeTag(tag) {
-    // This will be handled by the tag input setup
-    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-    checkboxes.forEach(checkbox => {
-        if (checkbox.value === tag) {
-            checkbox.checked = false;
+    // Remove from selected tags array
+    if (window.selectedTags) {
+        const index = window.selectedTags.indexOf(tag);
+        if (index > -1) {
+            window.selectedTags.splice(index, 1);
         }
-    });
+    }
     
-    // Trigger change event
-    const event = new Event('change');
-    document.getElementById('tag-checkboxes').dispatchEvent(event);
+    // Update button state
+    const tagButton = document.querySelector(`[data-tag="${tag}"]`);
+    if (tagButton) {
+        tagButton.classList.remove('btn-primary');
+        tagButton.classList.add('btn-outline-primary');
+    }
+    
+    // Update selected tags display
+    const tagContainer = document.getElementById('selected-tags');
+    if (tagContainer && window.app) {
+        window.app.updateSelectedTags(tagContainer, window.selectedTags || []);
+    }
 }
 
 function showApplyModal(taskId) {
@@ -2389,6 +2454,19 @@ function showUserProfileFromTaskDetail() {
 function showMessagesModal() {
     const modal = new bootstrap.Modal(document.getElementById('messages-modal'));
     app.loadConversations();
+    
+    // Reset modal state
+    const messagesContent = document.getElementById('messages-content');
+    const noConversationSelected = document.getElementById('no-conversation-selected');
+    
+    if (messagesContent) {
+        messagesContent.style.display = 'none';
+    }
+    
+    if (noConversationSelected) {
+        noConversationSelected.style.display = 'block';
+    }
+    
     modal.show();
 }
 
@@ -2480,6 +2558,37 @@ function showNotifications() {
 function openMessagesModal() {
     if (window.app) {
         window.app.openMessagesModal();
+    }
+}
+
+// Task Status Action Functions
+function startWork(taskId) {
+    if (window.app) {
+        window.app.startWork(taskId);
+    }
+}
+
+function requestCompletion(taskId) {
+    if (window.app) {
+        window.app.requestCompletion(taskId);
+    }
+}
+
+function cancelTask(taskId) {
+    if (window.app) {
+        window.app.cancelTask(taskId);
+    }
+}
+
+function reopenTask(taskId) {
+    if (window.app) {
+        window.app.reopenTask(taskId);
+    }
+}
+
+function markTaskCompleted(taskId) {
+    if (window.app) {
+        window.app.markTaskAsCompleted(taskId);
     }
 }
 

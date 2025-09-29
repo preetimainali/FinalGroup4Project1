@@ -816,21 +816,38 @@ class DataManager {
             tasks = tasks.filter(task => filters.status.includes(task.status));
         }
         
-        if (filters.jobType && filters.jobType.length > 0) {
-            tasks = tasks.filter(task => filters.jobType.includes(task.jobType));
-        }
         
-        if (filters.college && filters.college.length > 0) {
+        if (filters.university && filters.university.length > 0) {
             tasks = tasks.filter(task => 
-                filters.college.includes(task.college)
+                filters.university.some(uni => task.college && task.college.includes(uni))
             );
         }
+        
         
         if (filters.priceRange) {
             tasks = tasks.filter(task => 
                 task.payAmount >= filters.priceRange.min && 
                 task.payAmount <= filters.priceRange.max
             );
+        }
+        
+        if (filters.category) {
+            const categoryMapping = {
+                'academic': ['tutoring', 'academic', 'homework', 'essay', 'research', 'study', 'programming'],
+                'household': ['cleaning', 'household', 'laundry', 'organizing', 'maintenance', 'assembly', 'furniture'],
+                'tech': ['tech', 'computer', 'software', 'website', 'programming', 'technical', 'data entry'],
+                'creative': ['design', 'graphic', 'photo', 'video', 'creative', 'art'],
+                'delivery': ['delivery', 'shopping', 'errands', 'transportation'],
+                'pets': ['pets', 'walking', 'animal care'],
+                'other': []
+            };
+            
+            const categoryTags = categoryMapping[filters.category] || [];
+            if (categoryTags.length > 0) {
+                tasks = tasks.filter(task => 
+                    categoryTags.some(tag => task.tags.includes(tag))
+                );
+            }
         }
         
         return tasks;
@@ -859,14 +876,59 @@ class DataManager {
         
         tasks.forEach(task => {
             task.tags.forEach(tag => {
-                tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+                // Normalize tag to lowercase and trim whitespace
+                const normalizedTag = tag.toLowerCase().trim();
+                tagCounts[normalizedTag] = (tagCounts[normalizedTag] || 0) + 1;
             });
         });
         
-        return Object.entries(tagCounts)
+        // Remove duplicates and sort by frequency
+        const uniqueTags = Object.entries(tagCounts)
             .sort(([,a], [,b]) => b - a)
-            .slice(0, 10)
             .map(([tag]) => tag);
+        
+        // Organize tags by category for better display
+        const organizedTags = this.organizeTagsByCategory(uniqueTags);
+        
+        return organizedTags;
+    }
+
+    organizeTagsByCategory(tags) {
+        const categories = {
+            'Academic': ['tutoring', 'programming', 'academic', 'homework', 'research', 'essay', 'writing'],
+            'Household': ['cleaning', 'household', 'assembly', 'furniture', 'moving', 'manual'],
+            'Tech': ['tech', 'computer', 'software', 'data entry', 'excel', 'remote'],
+            'Services': ['delivery', 'shopping', 'errands', 'printing'],
+            'Pets': ['pets', 'walking', 'weekend'],
+            'Creative': ['design', 'graphic', 'photo', 'video', 'creative']
+        };
+
+        const organized = {};
+        
+        // Categorize tags
+        tags.forEach(tag => {
+            let categorized = false;
+            for (const [category, categoryTags] of Object.entries(categories)) {
+                if (categoryTags.includes(tag)) {
+                    if (!organized[category]) {
+                        organized[category] = [];
+                    }
+                    organized[category].push(tag);
+                    categorized = true;
+                    break;
+                }
+            }
+            
+            // If not categorized, add to "Other"
+            if (!categorized) {
+                if (!organized['Other']) {
+                    organized['Other'] = [];
+                }
+                organized['Other'].push(tag);
+            }
+        });
+
+        return organized;
     }
 
     getUSColleges() {
@@ -1184,13 +1246,142 @@ class DataManager {
         return notifications.length > 0 ? Math.max(...notifications.map(n => n.id)) + 1 : 1;
     }
 
+    // Task Status Management Methods
+    updateTaskStatus(taskId, newStatus, updateData = {}) {
+        const task = this.getTaskById(taskId);
+        if (!task) return null;
+
+        const statusHistory = task.statusHistory || [];
+        statusHistory.push({
+            from: task.status,
+            to: newStatus,
+            updatedAt: new Date().toISOString(),
+            updatedBy: this.getCurrentUser() || 'system'
+        });
+
+        const updateFields = {
+            status: newStatus,
+            statusHistory: statusHistory,
+            ...updateData
+        };
+
+        // Add status-specific timestamps
+        if (newStatus === 'assigned') {
+            updateFields.assignedAt = new Date().toISOString();
+        } else if (newStatus === 'completed') {
+            updateFields.completedAt = new Date().toISOString();
+        } else if (newStatus === 'cancelled') {
+            updateFields.cancelledAt = new Date().toISOString();
+        }
+
+        return this.updateTask(taskId, updateFields);
+    }
+
+    getTaskStatusInfo(taskId) {
+        const task = this.getTaskById(taskId);
+        if (!task) return null;
+
+        const statusInfo = {
+            current: task.status,
+            history: task.statusHistory || [],
+            timeline: this.getTaskTimeline(task),
+            nextActions: this.getNextAvailableActions(task)
+        };
+
+        return statusInfo;
+    }
+
+    getTaskTimeline(task) {
+        const timeline = [
+            {
+                status: 'posted',
+                label: 'Task Posted',
+                timestamp: task.createdAt,
+                completed: true
+            }
+        ];
+
+        if (task.assignedAt) {
+            timeline.push({
+                status: 'assigned',
+                label: 'Helper Assigned',
+                timestamp: task.assignedAt,
+                completed: true
+            });
+        }
+
+        if (task.completedAt) {
+            timeline.push({
+                status: 'completed',
+                label: 'Task Completed',
+                timestamp: task.completedAt,
+                completed: true
+            });
+        }
+
+        if (task.cancelledAt) {
+            timeline.push({
+                status: 'cancelled',
+                label: 'Task Cancelled',
+                timestamp: task.cancelledAt,
+                completed: true
+            });
+        }
+
+        return timeline;
+    }
+
+    getNextAvailableActions(task) {
+        const actions = [];
+        const currentUser = this.getCurrentUser();
+        const currentUserData = this.getUserByEmail(currentUser);
+
+        if (!currentUser || !currentUserData) return actions;
+
+        const isPoster = task.posterEmail === currentUser;
+        const isHelper = this.isUserHelperForTask(task.id, currentUser);
+
+        switch (task.status) {
+            case 'open':
+                if (isPoster) {
+                    actions.push({ action: 'review_applications', label: 'Review Applications' });
+                    actions.push({ action: 'cancel_task', label: 'Cancel Task' });
+                }
+                break;
+            case 'assigned':
+                if (isPoster) {
+                    actions.push({ action: 'mark_completed', label: 'Mark as Completed' });
+                    actions.push({ action: 'cancel_task', label: 'Cancel Task' });
+                }
+                if (isHelper) {
+                    actions.push({ action: 'start_work', label: 'Start Work' });
+                    actions.push({ action: 'request_completion', label: 'Request Completion' });
+                }
+                break;
+            case 'completed':
+                if (isPoster) {
+                    actions.push({ action: 'rate_helper', label: 'Rate Helper' });
+                    actions.push({ action: 'reopen_task', label: 'Reopen Task' });
+                }
+                if (isHelper) {
+                    actions.push({ action: 'rate_poster', label: 'Rate Poster' });
+                }
+                break;
+        }
+
+        return actions;
+    }
+
+    isUserHelperForTask(taskId, userEmail) {
+        const applications = this.getApplicationsByTaskId(taskId);
+        return applications.some(app => 
+            app.helperEmail === userEmail && app.status === 'accepted'
+        );
+    }
+
     // Task Completion Methods
     markTaskAsCompleted(taskId, completionData) {
-        const task = this.updateTask(taskId, { 
-            status: 'completed',
-            completedAt: new Date().toISOString(),
-            ...completionData
-        });
+        const task = this.updateTaskStatus(taskId, 'completed', completionData);
         
         if (task) {
             // Create notification for task poster
@@ -1203,6 +1394,22 @@ class DataManager {
                     message: `Your task "${task.title}" has been marked as completed.`,
                     data: { taskId: task.id }
                 });
+            }
+
+            // Create notification for helper
+            const applications = this.getApplicationsByTaskId(taskId);
+            const acceptedApp = applications.find(app => app.status === 'accepted');
+            if (acceptedApp) {
+                const helper = this.getUserByEmail(acceptedApp.helperEmail);
+                if (helper) {
+                    this.addNotification({
+                        userId: helper.id,
+                        type: 'task_completed',
+                        title: 'Task Completed',
+                        message: `The task "${task.title}" has been marked as completed.`,
+                        data: { taskId: task.id }
+                    });
+                }
             }
         }
         
