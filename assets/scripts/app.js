@@ -737,10 +737,27 @@ class GetItDoneApp {
                     
                     // Set tags
                     if (task.tags) {
+                        // Update the global selectedTags array
+                        window.selectedTags = [...task.tags];
+                        
+                        // Update tag buttons
                         task.tags.forEach(tag => {
+                            const tagButton = document.querySelector(`[data-tag="${tag}"]`);
+                            if (tagButton) {
+                                tagButton.classList.remove('btn-outline-primary');
+                                tagButton.classList.add('btn-primary');
+                            }
+                            
+                            // Also check checkboxes if they exist
                             const checkbox = form.querySelector(`input[value="${tag}"]`);
                             if (checkbox) checkbox.checked = true;
                         });
+                        
+                        // Update the selected tags display
+                        const tagContainer = document.getElementById('selected-tags');
+                        if (tagContainer) {
+                            this.updateSelectedTags(tagContainer, task.tags);
+                        }
                     }
                     
                     // Update page title
@@ -954,7 +971,12 @@ class GetItDoneApp {
         if (!tagInput || !tagContainer) return;
 
         const popularTags = dataManager.getPopularTags();
-        let selectedTags = [];
+        let selectedTags = window.selectedTags || [];
+        
+        // Initialize window.selectedTags if it doesn't exist
+        if (!window.selectedTags) {
+            window.selectedTags = [];
+        }
 
         // Create organized tag checkboxes
         const tagCheckboxes = document.getElementById('tag-checkboxes');
@@ -1003,6 +1025,8 @@ class GetItDoneApp {
                 const customTag = tagInput.value.trim().toLowerCase();
                 if (customTag && !selectedTags.includes(customTag)) {
                     selectedTags.push(customTag);
+                    // Update the global selectedTags array
+                    window.selectedTags = selectedTags;
                     this.updateSelectedTags(tagContainer, selectedTags);
                     tagInput.value = '';
                 }
@@ -1023,6 +1047,10 @@ class GetItDoneApp {
             button.classList.remove('btn-outline-primary');
             button.classList.add('btn-primary');
         }
+        
+        // Update the global selectedTags array
+        window.selectedTags = selectedTags;
+        
         this.updateSelectedTags(container, selectedTags);
     }
 
@@ -1082,11 +1110,15 @@ class GetItDoneApp {
         const editTaskId = urlParams.get('edit');
         const isEdit = !!editTaskId;
         
-        // Get selected tags
-        const selectedTags = [];
+        // Get selected tags from the global selectedTags array (includes custom tags and button selections)
+        const selectedTags = window.selectedTags || [];
+        
+        // Also check for any checked checkboxes as a fallback
         const checkboxes = form.querySelectorAll('input[type="checkbox"]:checked');
         checkboxes.forEach(checkbox => {
-            selectedTags.push(checkbox.value);
+            if (!selectedTags.includes(checkbox.value)) {
+                selectedTags.push(checkbox.value);
+            }
         });
 
         const taskData = {

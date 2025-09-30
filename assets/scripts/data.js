@@ -952,6 +952,46 @@ class DataManager {
         ];
     }
 
+    validateUniversityEmail(email) {
+        const universityDomains = [
+            'ua.edu',
+            'auburn.edu',
+            'southalabama.edu',
+            'troy.edu',
+            'jsu.edu',
+            'una.edu',
+            'montevallo.edu',
+            'alasu.edu',
+            'aamu.edu',
+            'uwa.edu'
+        ];
+        
+        const emailDomain = email.split('@')[1];
+        const universityInfo = universityDomains.find(domain => emailDomain === domain);
+        
+        if (universityInfo) {
+            const universityNames = {
+                'ua.edu': 'University of Alabama - Tuscaloosa',
+                'auburn.edu': 'Auburn University',
+                'southalabama.edu': 'University of South Alabama',
+                'troy.edu': 'Troy University',
+                'jsu.edu': 'Jacksonville State University',
+                'una.edu': 'University of North Alabama',
+                'montevallo.edu': 'University of Montevallo',
+                'alasu.edu': 'Alabama State University',
+                'aamu.edu': 'Alabama A&M University',
+                'uwa.edu': 'University of West Alabama'
+            };
+            
+            return {
+                valid: true,
+                university: universityNames[universityInfo]
+            };
+        }
+        
+        return null;
+    }
+
     // Application Management Methods
     getAllApplications() {
         const applicationsJson = localStorage.getItem('getitdone_applications');
