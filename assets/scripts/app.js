@@ -158,7 +158,13 @@ class GetItDoneApp {
         const popularTags = dataManager.getPopularTags();
         tagsContainer.innerHTML = '';
 
-        popularTags.forEach(tag => {
+        // Flatten all tags from all categories
+        const allTags = [];
+        Object.values(popularTags).forEach(categoryTags => {
+            allTags.push(...categoryTags);
+        });
+
+        allTags.forEach(tag => {
             const tagElement = document.createElement('a');
             tagElement.href = `browse.html?tag=${encodeURIComponent(tag)}`;
             tagElement.className = 'tag-badge';
@@ -1340,7 +1346,12 @@ class GetItDoneApp {
 
         // Check if user already applied
         const existingApplications = dataManager.getApplicationsByHelperEmail(this.currentUser);
+        console.log('Current user:', this.currentUser);
+        console.log('Existing applications:', existingApplications);
+        console.log('Task ID:', taskId);
+        
         const alreadyApplied = existingApplications.some(app => app.taskId === taskId);
+        console.log('Already applied:', alreadyApplied);
         
         if (alreadyApplied) {
             this.showError('You have already applied for this task');
@@ -1634,18 +1645,25 @@ class GetItDoneApp {
     }
 
     initCommonFeatures() {
+        console.log('Initializing common features');
         // Initialize any common features that apply to all pages
         this.setupApplyModal();
         this.setupLoginModal();
         this.setupRegisterModal();
         this.updateNavigation();
+        console.log('Common features initialized');
     }
 
     setupLoginModal() {
         const form = document.getElementById('login-form');
-        if (!form) return;
+        if (!form) {
+            console.log('Login form not found on page:', window.location.pathname);
+            return;
+        }
 
+        console.log('Setting up login form event listener');
         form.addEventListener('submit', (e) => {
+            console.log('Login form submitted');
             e.preventDefault();
             this.handleLogin(form);
         });
@@ -1662,17 +1680,25 @@ class GetItDoneApp {
     }
 
     handleLogin(form) {
+        console.log('handleLogin called');
         const formData = new FormData(form);
         const email = formData.get('email');
         const password = formData.get('password');
 
+        console.log('Login attempt:', { email, password: password ? '***' : 'empty' });
+
         if (!email || !password) {
+            console.log('Missing email or password');
             this.showError('Please fill in all fields');
             return;
         }
 
+        console.log('Checking dataManager:', typeof dataManager);
         const user = dataManager.authenticateUser(email, password);
+        console.log('Authentication result:', user);
+        
         if (user) {
+            console.log('Login successful for:', user.name);
             this.setCurrentUser(email);
             const modal = bootstrap.Modal.getInstance(document.getElementById('login-modal'));
             modal.hide();
@@ -1687,6 +1713,7 @@ class GetItDoneApp {
                 }
             }, 300);
         } else {
+            console.log('Login failed - invalid credentials');
             this.showError('Invalid email or password. Please check your credentials or create a new account.');
         }
     }
@@ -2669,6 +2696,22 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('Test credentials:');
         console.log('Email: test@example.com');
         console.log('Password: test123');
+    };
+    
+    // Function to clear all applications for testing
+    window.clearAllApplications = function() {
+        console.log('Clearing all applications...');
+        localStorage.removeItem('getitdone_applications');
+        // Also clear the flag that prevents re-seeding
+        localStorage.setItem('getitdone_applications_cleared', 'true');
+        console.log('All applications cleared!');
+    };
+    
+    // Function to check current applications
+    window.checkApplications = function() {
+        const apps = dataManager.getAllApplications();
+        console.log('Current applications:', apps);
+        return apps;
     };
     
     // Close profile dropdown when clicking outside

@@ -603,6 +603,12 @@ class DataManager {
     }
 
     seedSampleApplications() {
+        // Check if applications were manually cleared
+        if (localStorage.getItem('getitdone_applications_cleared') === 'true') {
+            console.log('Applications were manually cleared, skipping sample data');
+            return;
+        }
+
         const sampleApplications = [
             {
                 id: 1,
@@ -1333,7 +1339,7 @@ class DataManager {
 
     getNextAvailableActions(task) {
         const actions = [];
-        const currentUser = this.getCurrentUser();
+        const currentUser = localStorage.getItem('getitdone_current_user');
         const currentUserData = this.getUserByEmail(currentUser);
 
         if (!currentUser || !currentUserData) return actions;
